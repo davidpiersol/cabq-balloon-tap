@@ -1,8 +1,10 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-/// Short-lived burner burst at a screen-normalized point (tap).
+/// Visual reference: brief propane-burner style puff (e.g. balloon burn ~3:42 in
+/// https://www.youtube.com/watch?v=yCnlvFN5kGM) — not a long campfire shape.
 class FlameBurst {
   FlameBurst({
     required this.xNorm,
@@ -14,7 +16,8 @@ class FlameBurst {
   final double yNorm;
   double age;
 
-  static const double lifetime = 0.38;
+  /// Short trigger pull — matches a quick burner blast, not a sustained flame.
+  static const double lifetime = 0.14;
 
   bool get isDead => age >= lifetime;
 }
@@ -25,34 +28,106 @@ class FlamePainter extends CustomPainter {
   final List<FlameBurst> flames;
   final Size size;
 
+  /// Brightness falls off fast (snappier than linear).
+  static double _burstCurve(double t) {
+    final u = (1.0 - t.clamp(0.0, 1.0));
+    return u * u * u;
+  }
+
   @override
   void paint(Canvas canvas, Size canvasSize) {
     for (final f in flames) {
       final t = (f.age / FlameBurst.lifetime).clamp(0.0, 1.0);
+      final pulse = _burstCurve(t);
+
       final cx = f.xNorm * size.width;
       final cy = f.yNorm * size.height;
-      final h = 36 + 28 * (1 - t);
-      final w = 18 + 10 * (1 - t);
 
-      final path = Path()
-        ..moveTo(cx, cy + h * 0.35)
-        ..quadraticBezierTo(cx - w, cy + h * 0.2, cx - w * 0.35, cy - h * 0.5)
-        ..quadraticBezierTo(cx, cy - h, cx + w * 0.35, cy - h * 0.5)
-        ..quadraticBezierTo(cx + w, cy + h * 0.2, cx, cy + h * 0.35)
+      // Narrow vertical jet: base near tap, tip shoots upward (into envelope).
+      final maxH = size.shortestSide * 0.11 * (0.92 + 0.08 * pulse);
+      final h = maxH * (0.35 + 0.65 * pulse);
+      final baseW = size.shortestSide * 0.018 * (0.7 + 0.3 * pulse);
+      final midW = baseW * (1.15 + 0.25 * (1 - t));
+
+      final tipY = cy - h;
+      final baseY = cy + baseW * 0.8;
+
+      final outerPath = Path()
+        ..moveTo(cx, tipY - h * 0.04)
+        ..quadraticBezierTo(cx - midW * 2.2, cy - h * 0.35, cx - baseW, baseY)
+        ..quadraticBezierTo(cx - baseW * 0.4, baseY + baseW * 0.5, cx, baseY + baseW * 0.35)
+        ..quadraticBezierTo(cx + baseW * 0.4, baseY + baseW * 0.5, cx + baseW, baseY)
+        ..quadraticBezierTo(cx + midW * 2.2, cy - h * 0.35, cx, tipY - h * 0.04)
         ..close();
 
-      final paint = Paint()
-        ..shader = ui.Gradient.linear(
-          Offset(cx, cy - h),
-          Offset(cx, cy + h * 0.4),
-          [
-            Colors.yellow.withValues(alpha: 0.95 * (1 - t * 0.5)),
-            Colors.deepOrange.withValues(alpha: 0.85 * (1 - t * 0.3)),
-            Colors.red.withValues(alpha: 0.5 * (1 - t)),
-          ],
-          [0, 0.45, 1],
+      final outerAlpha = (0.42 * pulse).clamp(0.0, 1.0);
+      canvas.drawPath(
+        outerPath,
+        Paint()
+          ..shader = ui.Gradient.linear(
+            Offset(cx, tipY),
+            Offset(cx, baseY + baseW),
+            [
+              const Color(0xFFFFF8E1).withValues(alpha: 0.15 * outerAlpha),
+              const Color(0xFFFF9800).withValues(alpha: 0.55 * outerAlpha),
+              const Color(0xFFE65100).withValues(alpha: 0.35 * outerAlpha),
+            ],
+            const [0.0, 0.5, 1.0],
+          ),
+      );
+
+      final innerPath = Path()
+        ..moveTo(cx, tipY)
+        ..quadraticBezierTo(cx - midW * 1.1, cy - h * 0.42, cx - baseW * 0.55, baseY)
+        ..quadraticBezierTo(cx, baseY + baseW * 0.15, cx + baseW * 0.55, baseY)
+        ..quadraticBezierTo(cx + midW * 1.1, cy - h * 0.42, cx, tipY)
+        ..close();
+
+      final coreAlpha = (0.95 * pulse).clamp(0.0, 1.0);
+      canvas.drawPath(
+        innerPath,
+        Paint()
+          ..shader = ui.Gradient.linear(
+            Offset(cx, tipY - h * 0.02),
+            Offset(cx, baseY + baseW * 0.2),
+            [
+              const Color(0xFFFFFFFF).withValues(alpha: 0.92 * coreAlpha),
+              const Color(0xFFFFEA00).withValues(alpha: 0.88 * coreAlpha),
+              const Color(0xFFFF6D00).withValues(alpha: 0.75 * coreAlpha),
+              const Color(0xFFFF3D00).withValues(alpha: 0.45 * coreAlpha),
+            ],
+            const [0.0, 0.22, 0.55, 1.0],
+          ),
+      );
+
+      // Tiny nozzle "blue" kiss at base (propane mix) — very subtle.
+      final nozzleH = baseW * 2.2;
+      canvas.drawOval(
+        Rect.fromCenter(
+          center: Offset(cx, baseY + baseW * 0.25),
+          width: baseW * 2.4,
+          height: nozzleH,
+        ),
+        Paint()
+          ..shader = ui.Gradient.linear(
+            Offset(cx, baseY - nozzleH),
+            Offset(cx, baseY + nozzleH),
+            [
+              const Color(0xFF64B5F6).withValues(alpha: 0.35 * pulse),
+              const Color(0xFF1565C0).withValues(alpha: 0.08 * pulse),
+            ],
+          ),
+      );
+
+      // Hot core glint — strongest only in first frames.
+      if (t < 0.35) {
+        final glint = (1.0 - t / 0.35).clamp(0.0, 1.0);
+        canvas.drawCircle(
+          Offset(cx, cy - h * 0.55),
+          baseW * 0.9 * math.sqrt(glint),
+          Paint()..color = Color.fromARGB((220 * glint * pulse).round(), 255, 255, 255),
         );
-      canvas.drawPath(path, paint);
+      }
     }
   }
 

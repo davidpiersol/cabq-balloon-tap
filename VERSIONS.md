@@ -2,6 +2,7 @@
 
 | Version   | Build | Summary                                      |
 | --------- | ----- | -------------------------------------------- |
+| **0.1.0** | +3    | Burner-style brief flame (vertical jet, fast fade) |
 | **0.1.0** | +2    | Flames, intro from ground, balloon customize, collectibles stub |
 | *0.2.0*   | —     | Planned: scroll, spawn & collect pickups     |
 | *0.3.0*   | —     | Planned: TBD                                 |
