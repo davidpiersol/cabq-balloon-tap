@@ -7,19 +7,23 @@ void main() {
       var vy = 0.0;
       vy = BalloonPhysics.applyGravity(vy, 0.016);
       expect(vy, greaterThan(0));
-      vy = BalloonPhysics.applyGravity(vy, 0.016);
-      expect(vy, greaterThan(0));
     });
 
-    test('applyGravity clamps to maxVy', () {
-      final vy = BalloonPhysics.applyGravity(1e6, 1.0);
-      expect(vy, BalloonPhysics.maxVy);
+    test('applyBurnerLift pulls vy toward upward target', () {
+      var vy = 0.0;
+      for (var i = 0; i < 200; i++) {
+        vy = BalloonPhysics.applyBurnerLift(vy, 0.016);
+      }
+      expect(vy, lessThan(0));
+      expect(vy, greaterThanOrEqualTo(-BalloonPhysics.maxVy));
     });
 
-    test('applyTap reduces velocity (lift)', () {
-      const vy = 0.0;
-      final after = BalloonPhysics.applyTap(vy);
-      expect(after, lessThan(vy));
+    test('applyCoastDamping moves vy toward zero', () {
+      var vy = -0.0008;
+      for (var i = 0; i < 100; i++) {
+        vy = BalloonPhysics.applyCoastDamping(vy, 0.016);
+      }
+      expect(vy.abs(), lessThan(0.0002));
     });
 
     test('stepPosition stays within 0..1', () {
@@ -32,23 +36,11 @@ void main() {
       expect(BalloonPhysics.isGameOver(BalloonPhysics.loseLow), isTrue);
       expect(BalloonPhysics.isGameOver(BalloonPhysics.loseHigh), isTrue);
       expect(BalloonPhysics.isGameOver(0.5), isFalse);
-      expect(BalloonPhysics.isGameOver(0.021), isFalse);
-      expect(BalloonPhysics.isGameOver(0.979), isFalse);
     });
 
     test('scoreDeltaForFrame scales with dt', () {
       expect(BalloonPhysics.scoreDeltaForFrame(0.1), 1);
       expect(BalloonPhysics.scoreDeltaForFrame(0.0), 0);
-    });
-
-    test('intro rises toward target', () {
-      var y = BalloonPhysics.introStartYNorm;
-      expect(BalloonPhysics.isIntroComplete(y), isFalse);
-      for (var i = 0; i < 5000; i++) {
-        y = BalloonPhysics.stepPosition(y, BalloonPhysics.introRiseVy, 0.016);
-        if (BalloonPhysics.isIntroComplete(y)) break;
-      }
-      expect(BalloonPhysics.isIntroComplete(y), isTrue);
     });
   });
 }

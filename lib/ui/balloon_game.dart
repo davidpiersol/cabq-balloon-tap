@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +14,7 @@ import 'balloon/balloon_envelope_painter.dart';
 import 'balloon/balloon_layout.dart';
 import 'balloon/customize_sheet.dart';
 import 'balloon/flame_painter.dart';
+import 'parallax_background_painter.dart';
 
 enum BalloonSkin {
   fiesta,
@@ -28,11 +28,16 @@ extension on BalloonSkin {
         BalloonSkin.sandiaSunset => 'Sandia Sunset',
         BalloonSkin.rioDawn => 'Rio Dawn',
       };
+
+  (Color, Color) get skyColors => switch (this) {
+        BalloonSkin.fiesta => (CabqTheme.skyTop, CabqTheme.skyBottom),
+        BalloonSkin.sandiaSunset => (const Color(0xFFFFB347), const Color(0xFF6B2D5C)),
+        BalloonSkin.rioDawn => (const Color(0xFF1E3A5F), const Color(0xFF4A90D9)),
+      };
 }
 
-enum _Phase { intro, playing }
-
-/// Physics + intro ascent + burner flames + appearance + collectible world stub.
+/// Hold to burn (sustained flame); release → short coast then gravity drift.
+/// Parallax background scrolls left for horizontal illusion.
 class BalloonGame extends StatefulWidget {
   const BalloonGame({super.key});
 
@@ -44,9 +49,8 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
   late Ticker _ticker;
   DateTime? _prevFrameTime;
 
-  double _yNorm = BalloonPhysics.introStartYNorm;
+  double _yNorm = BalloonPhysics.groundStartYNorm;
   double _vy = 0;
-  // v0.2: tie to world scroll / input.
   // ignore: prefer_final_fields
   double _balloonXNorm = 0.5;
 
@@ -54,13 +58,18 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
   int _best = 0;
   bool _gameOver = false;
   bool _ready = false;
-  _Phase _phase = _Phase.intro;
+
+  bool _burnHeld = false;
+  double _coastRemaining = 0;
+  double _scrollPx = 0;
+  double _elapsedSec = 0;
 
   BalloonSkin _skin = BalloonSkin.fiesta;
   BalloonAppearance _appearance = BalloonAppearance.defaultLook;
 
-  final List<FlameBurst> _flames = [];
   final CollectibleWorld _world = CollectibleWorld();
+
+  double _layoutWidth = 400;
 
   @override
   void initState() {
@@ -90,51 +99,49 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
     _prevFrameTime = now;
     if (dt <= 0 || dt > 0.05) return;
 
-    for (final f in _flames) {
-      f.age += dt;
-    }
-    _flames.removeWhere((f) => f.isDead);
+    final w = _layoutWidth;
+    final nextElapsed = _elapsedSec + dt;
+    final nextScroll = _scrollPx + w * BalloonPhysics.parallaxScrollPerSec * dt;
+    _world.scrollXNnorm = (nextScroll / w) % 1.0;
     _world.tick(dt);
 
-    double nextY = _yNorm;
-    double nextVy = _vy;
-    var nextPhase = _phase;
-    var lost = false;
-    var scoreAdd = 0;
+    var nextCoast = _coastRemaining;
+    if (!_burnHeld && nextCoast > 0) {
+      nextCoast -= dt;
+      if (nextCoast < 0) nextCoast = 0;
+    }
 
-    if (_phase == _Phase.intro) {
-      nextVy = BalloonPhysics.introRiseVy;
-      nextY = BalloonPhysics.stepPosition(_yNorm, nextVy, dt);
-      if (BalloonPhysics.isIntroComplete(nextY)) {
-        nextPhase = _Phase.playing;
-        nextVy = 0;
-      }
-      if (BalloonPhysics.isGameOver(nextY)) lost = true;
+    double nextVy = _vy;
+    if (_burnHeld) {
+      nextVy = BalloonPhysics.applyBurnerLift(_vy, dt);
+    } else if (nextCoast > 0) {
+      nextVy = BalloonPhysics.applyCoastDamping(_vy, dt);
     } else {
       nextVy = BalloonPhysics.applyGravity(_vy, dt);
-      nextY = BalloonPhysics.stepPosition(_yNorm, nextVy, dt);
-      if (BalloonPhysics.isGameOver(nextY)) {
-        lost = true;
-      } else {
-        scoreAdd = BalloonPhysics.scoreDeltaForFrame(dt);
-      }
     }
+
+    final nextY = BalloonPhysics.stepPosition(_yNorm, nextVy, dt);
+    final lost = BalloonPhysics.isGameOver(nextY);
 
     if (lost) {
       setState(() {
+        _elapsedSec = nextElapsed;
+        _scrollPx = nextScroll;
+        _coastRemaining = nextCoast;
         _yNorm = nextY;
         _vy = nextVy;
-        _phase = nextPhase;
       });
       _endRound();
       return;
     }
 
     setState(() {
+      _elapsedSec = nextElapsed;
+      _scrollPx = nextScroll;
+      _coastRemaining = nextCoast;
       _yNorm = nextY;
       _vy = nextVy;
-      _phase = nextPhase;
-      _score += scoreAdd;
+      _score += BalloonPhysics.scoreDeltaForFrame(dt);
       if (_score > _best) _best = _score;
     });
   }
@@ -142,6 +149,8 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
   void _endRound() {
     if (_gameOver) return;
     _gameOver = true;
+    _burnHeld = false;
+    _coastRemaining = 0;
     _ticker.stop();
     HapticFeedback.heavyImpact();
     setState(() {});
@@ -152,35 +161,42 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
     });
   }
 
-  void _onTapDown(double w, double h) {
-    if (!_ready) return;
-    if (_gameOver) {
-      HapticFeedback.mediumImpact();
-      _restart();
-      return;
-    }
-    if (_phase == _Phase.playing) {
-      HapticFeedback.lightImpact();
-    } else {
-      HapticFeedback.selectionClick();
-    }
+  double get _flameStrength {
+    if (_burnHeld) return 1.0;
+    if (_coastRemaining <= 0) return 0.0;
+    return (_coastRemaining / BalloonPhysics.coastDuration).clamp(0.0, 1.0);
+  }
+
+  void _onPointerDown() {
+    if (!_ready || _gameOver) return;
+    HapticFeedback.selectionClick();
     setState(() {
-      _flames.add(FlameBurst());
-      if (_phase == _Phase.playing) {
-        _vy = BalloonPhysics.applyTap(_vy);
+      _burnHeld = true;
+      _coastRemaining = 0;
+    });
+  }
+
+  void _onPointerUpOrCancel() {
+    if (!_ready || _gameOver) return;
+    setState(() {
+      if (_burnHeld) {
+        _coastRemaining = BalloonPhysics.coastDuration;
       }
+      _burnHeld = false;
     });
   }
 
   void _restart() {
     setState(() {
-      _yNorm = BalloonPhysics.introStartYNorm;
+      _yNorm = BalloonPhysics.groundStartYNorm;
       _vy = 0;
       _score = 0;
       _gameOver = false;
-      _phase = _Phase.intro;
+      _burnHeld = false;
+      _coastRemaining = 0;
+      _scrollPx = 0;
+      _elapsedSec = 0;
       _prevFrameTime = null;
-      _flames.clear();
       _world.clear();
     });
     unawaited(_ticker.start());
@@ -214,6 +230,7 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
       builder: (context, constraints) {
         final h = constraints.maxHeight;
         final w = constraints.maxWidth;
+        _layoutWidth = w;
         final balloonY = h * _yNorm;
         final size = Size(w, h);
         final burner = BalloonLayout.burnerScreenOffset(
@@ -222,149 +239,179 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
           balloonCenterYNorm: _yNorm,
           balloonXNorm: _balloonXNorm,
         );
-        return GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTapDown: (_) => _onTapDown(w, h),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              CustomPaint(
-                painter: _SkyPainter(skin: _skin),
-              ),
-              Positioned(
-                left: 16,
-                right: 16,
-                top: 12,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _Chip(text: 'Score $_score', semanticLabel: 'Current score, $_score'),
-                          _Chip(text: 'Best $_best', semanticLabel: 'Best score, $_best'),
-                        ],
-                      ),
-                    ),
-                    IconButton.filledTonal(
-                      tooltip: 'Balloon colors and pattern',
-                      onPressed: () => _openCustomize(context),
-                      icon: const Icon(Icons.palette_outlined),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.black45,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Positioned(
-                left: w * _balloonXNorm - BalloonLayout.positionedHalfWidth,
-                top: balloonY - BalloonLayout.positionedTopOffset,
-                child: ExcludeSemantics(
-                  child: CustomPaint(
-                    size: const Size(BalloonLayout.width, BalloonLayout.height),
-                    painter: BalloonEnvelopePainter(appearance: _appearance),
-                  ),
-                ),
-              ),
-              CustomPaint(
-                painter: FlamePainter(
-                  flames: _flames,
-                  size: size,
-                  burnerPosition: burner,
+        final (skyTop, skyBottom) = _skin.skyColors;
+
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            IgnorePointer(
+              child: CustomPaint(
+                painter: ParallaxBackgroundPainter(
+                  skyTop: skyTop,
+                  skyBottom: skyBottom,
+                  scrollPx: _scrollPx,
+                  timeSec: _elapsedSec,
                 ),
                 size: size,
               ),
-              if (_gameOver)
-                Center(
-                  child: Semantics(
-                    liveRegion: true,
-                    label:
-                        'Game over. Score $_score. Personal best $_best. Use the Play again button.',
-                    child: Card(
-                      margin: const EdgeInsets.all(24),
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Balloon down!',
-                              style: Theme.of(context).textTheme.headlineSmall,
-                            ),
-                            const SizedBox(height: 8),
-                            Text('Score: $_score · Best: $_best'),
-                            const SizedBox(height: 16),
-                            FilledButton(
-                              onPressed: _restart,
-                              child: const Text('Play again'),
-                            ),
-                          ],
-                        ),
+            ),
+            Positioned.fill(
+              child: IgnorePointer(
+                ignoring: _gameOver,
+                child: Listener(
+                  behavior: HitTestBehavior.translucent,
+                  onPointerDown: (_) => _onPointerDown(),
+                  onPointerUp: (_) => _onPointerUpOrCancel(),
+                  onPointerCancel: (_) => _onPointerUpOrCancel(),
+                ),
+              ),
+            ),
+            Positioned(
+              left: w * _balloonXNorm - BalloonLayout.positionedHalfWidth,
+              top: balloonY - BalloonLayout.positionedTopOffset,
+              child: IgnorePointer(
+                child: CustomPaint(
+                  size: const Size(BalloonLayout.width, BalloonLayout.height),
+                  painter: BalloonEnvelopePainter(appearance: _appearance),
+                ),
+              ),
+            ),
+            IgnorePointer(
+              child: CustomPaint(
+                painter: FlamePainter(
+                  flameStrength: _flameStrength,
+                  size: size,
+                  burnerPosition: burner,
+                  timeSec: _elapsedSec,
+                ),
+                size: size,
+              ),
+            ),
+            Positioned(
+              left: 16,
+              right: 16,
+              top: 12,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _Chip(text: 'Score $_score', semanticLabel: 'Current score, $_score'),
+                        _Chip(text: 'Best $_best', semanticLabel: 'Best score, $_best'),
+                      ],
+                    ),
+                  ),
+                  IconButton.filledTonal(
+                    tooltip: 'Balloon colors and pattern',
+                    onPressed: () => _openCustomize(context),
+                    icon: const Icon(Icons.palette_outlined),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.black45,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (_gameOver) ...[
+              Positioned.fill(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    _restart();
+                  },
+                  child: Container(color: Colors.black.withValues(alpha: 0.22)),
+                ),
+              ),
+              Center(
+                child: Semantics(
+                  liveRegion: true,
+                  label:
+                      'Game over. Score $_score. Personal best $_best. Use the Play again button.',
+                  child: Card(
+                    margin: const EdgeInsets.all(24),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Balloon down!',
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
+                          const SizedBox(height: 8),
+                          Text('Score: $_score · Best: $_best'),
+                          const SizedBox(height: 16),
+                          FilledButton(
+                            onPressed: () {
+                              HapticFeedback.mediumImpact();
+                              _restart();
+                            },
+                            child: const Text('Play again'),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 16,
-                child: Column(
-                  children: [
-                    Semantics(
-                      label: _gameOver
-                          ? 'Hint: tap the sky area to play again'
-                          : _phase == _Phase.intro
-                              ? 'Rising from the ground to the sweet spot. Then tap anywhere to fire the burner and lift.'
-                              : 'Hint: tap anywhere to fire the burner between basket and balloon and lift',
-                      child: Text(
-                        _gameOver
-                            ? 'Tap to restart'
-                            : _phase == _Phase.intro
-                                ? 'Rising to the sweet spot…'
-                                : 'Tap to burn · stay in the sweet spot',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white,
-                              shadows: const [Shadow(blurRadius: 4, color: Colors.black45)],
-                            ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: SegmentedButton<BalloonSkin>(
-                        style: SegmentedButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
-                        ),
-                        segments: BalloonSkin.values
-                            .map(
-                              (s) => ButtonSegment<BalloonSkin>(
-                                value: s,
-                                label: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 4),
-                                  child: Text(
-                                    s.label,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                  ),
-                                ),
-                              ),
-                            )
-                            .toList(),
-                        selected: {_skin},
-                        onSelectionChanged: (set) {
-                          setState(() => _skin = set.first);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
               ),
             ],
-          ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 16,
+              child: Column(
+                children: [
+                  Semantics(
+                    label: _gameOver
+                        ? 'Hint: tap to play again'
+                        : 'Hold to burn and rise. Release to coast, then drift down. Background scrolls for forward motion.',
+                    child: Text(
+                      _gameOver
+                          ? 'Tap to restart'
+                          : 'Hold to burn · release to coast · sky moves past you',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.white,
+                            shadows: const [Shadow(blurRadius: 4, color: Colors.black45)],
+                          ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: SegmentedButton<BalloonSkin>(
+                      style: SegmentedButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      segments: BalloonSkin.values
+                          .map(
+                            (s) => ButtonSegment<BalloonSkin>(
+                              value: s,
+                              label: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                child: Text(
+                                  s.label,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      selected: {_skin},
+                      onSelectionChanged: (set) {
+                        setState(() => _skin = set.first);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         );
       },
     );
@@ -397,55 +444,4 @@ class _Chip extends StatelessWidget {
       ),
     );
   }
-}
-
-class _SkyPainter extends CustomPainter {
-  _SkyPainter({required this.skin});
-
-  final BalloonSkin skin;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    final top = switch (skin) {
-      BalloonSkin.fiesta => CabqTheme.skyTop,
-      BalloonSkin.sandiaSunset => const Color(0xFFFFB347),
-      BalloonSkin.rioDawn => const Color(0xFF1E3A5F),
-    };
-    final bottom = switch (skin) {
-      BalloonSkin.fiesta => CabqTheme.skyBottom,
-      BalloonSkin.sandiaSunset => const Color(0xFF6B2D5C),
-      BalloonSkin.rioDawn => const Color(0xFF4A90D9),
-    };
-    final g = Paint()
-      ..shader = LinearGradient(
-        colors: [top, bottom],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-      ).createShader(rect);
-    canvas.drawRect(rect, g);
-
-    final path = Path()
-      ..moveTo(0, size.height * 0.72)
-      ..lineTo(size.width * 0.2, size.height * 0.55)
-      ..lineTo(size.width * 0.45, size.height * 0.62)
-      ..lineTo(size.width * 0.7, size.height * 0.48)
-      ..lineTo(size.width, size.height * 0.58)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
-      ..close();
-    canvas.drawPath(
-      path,
-      Paint()..color = Colors.black.withValues(alpha: 0.18),
-    );
-
-    canvas.drawCircle(
-      Offset(size.width * 0.82, size.height * 0.14),
-      math.min(size.width, size.height) * 0.06,
-      Paint()..color = Colors.white.withValues(alpha: 0.35),
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _SkyPainter oldDelegate) => oldDelegate.skin != skin;
 }
