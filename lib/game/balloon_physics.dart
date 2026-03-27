@@ -8,6 +8,13 @@ abstract final class BalloonPhysics {
   static const double loseLow = 0.02;
   static const double loseHigh = 0.98;
 
+  /// Intro: balloon starts near ground and rises to play band.
+  static const double introStartYNorm = 0.90;
+  static const double introTargetYNorm = 0.52;
+  static const double introRiseVy = -0.0009;
+
+  static bool isIntroComplete(double yNorm) => yNorm <= introTargetYNorm;
+
   /// Integrate gravity for one frame ([dt] in seconds).
   static double applyGravity(double vy, double dt) {
     return (vy + gravity * dt).clamp(-maxVy, maxVy);
