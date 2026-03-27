@@ -3,32 +3,31 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-/// Visual reference: brief propane-burner style puff (e.g. balloon burn ~3:42 in
-/// https://www.youtube.com/watch?v=yCnlvFN5kGM) — not a long campfire shape.
+/// One burner pulse (tap anywhere triggers; drawn at [burnerPosition], not at tap).
 class FlameBurst {
-  FlameBurst({
-    required this.xNorm,
-    required this.yNorm,
-    this.age = 0,
-  });
+  FlameBurst({this.age = 0});
 
-  final double xNorm;
-  final double yNorm;
   double age;
 
-  /// Short trigger pull — matches a quick burner blast, not a sustained flame.
+  /// Short trigger pull — matches a quick burner blast.
   static const double lifetime = 0.14;
 
   bool get isDead => age >= lifetime;
 }
 
 class FlamePainter extends CustomPainter {
-  FlamePainter({required this.flames, required this.size});
+  FlamePainter({
+    required this.flames,
+    required this.size,
+    required this.burnerPosition,
+  });
 
   final List<FlameBurst> flames;
   final Size size;
 
-  /// Brightness falls off fast (snappier than linear).
+  /// Stack coordinates: tip of flame shoots upward (−Y) toward the envelope.
+  final Offset burnerPosition;
+
   static double _burstCurve(double t) {
     final u = (1.0 - t.clamp(0.0, 1.0));
     return u * u * u;
@@ -36,14 +35,13 @@ class FlamePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size canvasSize) {
+    final cx = burnerPosition.dx.clamp(0.0, size.width);
+    final cy = burnerPosition.dy.clamp(0.0, size.height);
+
     for (final f in flames) {
       final t = (f.age / FlameBurst.lifetime).clamp(0.0, 1.0);
       final pulse = _burstCurve(t);
 
-      final cx = f.xNorm * size.width;
-      final cy = f.yNorm * size.height;
-
-      // Narrow vertical jet: base near tap, tip shoots upward (into envelope).
       final maxH = size.shortestSide * 0.11 * (0.92 + 0.08 * pulse);
       final h = maxH * (0.35 + 0.65 * pulse);
       final baseW = size.shortestSide * 0.018 * (0.7 + 0.3 * pulse);
@@ -100,7 +98,6 @@ class FlamePainter extends CustomPainter {
           ),
       );
 
-      // Tiny nozzle "blue" kiss at base (propane mix) — very subtle.
       final nozzleH = baseW * 2.2;
       canvas.drawOval(
         Rect.fromCenter(
@@ -119,7 +116,6 @@ class FlamePainter extends CustomPainter {
           ),
       );
 
-      // Hot core glint — strongest only in first frames.
       if (t < 0.35) {
         final glint = (1.0 - t / 0.35).clamp(0.0, 1.0);
         canvas.drawCircle(

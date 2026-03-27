@@ -12,6 +12,7 @@ import '../game/balloon_physics.dart';
 import '../game/collectibles/collectible_world.dart';
 import '../theme/cabq_theme.dart';
 import 'balloon/balloon_envelope_painter.dart';
+import 'balloon/balloon_layout.dart';
 import 'balloon/customize_sheet.dart';
 import 'balloon/flame_painter.dart';
 
@@ -151,22 +152,20 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
     });
   }
 
-  void _onTapDown(TapDownDetails d, double w, double h) {
+  void _onTapDown(double w, double h) {
     if (!_ready) return;
     if (_gameOver) {
       HapticFeedback.mediumImpact();
       _restart();
       return;
     }
-    final lx = (d.localPosition.dx / w).clamp(0.0, 1.0);
-    final ly = (d.localPosition.dy / h).clamp(0.0, 1.0);
     if (_phase == _Phase.playing) {
       HapticFeedback.lightImpact();
     } else {
       HapticFeedback.selectionClick();
     }
     setState(() {
-      _flames.add(FlameBurst(xNorm: lx, yNorm: ly));
+      _flames.add(FlameBurst());
       if (_phase == _Phase.playing) {
         _vy = BalloonPhysics.applyTap(_vy);
       }
@@ -217,18 +216,20 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
         final w = constraints.maxWidth;
         final balloonY = h * _yNorm;
         final size = Size(w, h);
+        final burner = BalloonLayout.burnerScreenOffset(
+          screenW: w,
+          screenH: h,
+          balloonCenterYNorm: _yNorm,
+          balloonXNorm: _balloonXNorm,
+        );
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTapDown: (d) => _onTapDown(d, w, h),
+          onTapDown: (_) => _onTapDown(w, h),
           child: Stack(
             fit: StackFit.expand,
             children: [
               CustomPaint(
                 painter: _SkyPainter(skin: _skin),
-              ),
-              CustomPaint(
-                painter: FlamePainter(flames: _flames, size: size),
-                size: size,
               ),
               Positioned(
                 left: 16,
@@ -258,14 +259,22 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
                 ),
               ),
               Positioned(
-                left: w * _balloonXNorm - 44,
-                top: balloonY - 70,
+                left: w * _balloonXNorm - BalloonLayout.positionedHalfWidth,
+                top: balloonY - BalloonLayout.positionedTopOffset,
                 child: ExcludeSemantics(
                   child: CustomPaint(
-                    size: const Size(88, 88 * 1.15),
+                    size: const Size(BalloonLayout.width, BalloonLayout.height),
                     painter: BalloonEnvelopePainter(appearance: _appearance),
                   ),
                 ),
+              ),
+              CustomPaint(
+                painter: FlamePainter(
+                  flames: _flames,
+                  size: size,
+                  burnerPosition: burner,
+                ),
+                size: size,
               ),
               if (_gameOver)
                 Center(
@@ -307,14 +316,14 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
                       label: _gameOver
                           ? 'Hint: tap the sky area to play again'
                           : _phase == _Phase.intro
-                              ? 'Rising from the ground to the sweet spot. Then tap to burn and lift.'
-                              : 'Hint: tap to create a burner flame and lift the balloon',
+                              ? 'Rising from the ground to the sweet spot. Then tap anywhere to fire the burner and lift.'
+                              : 'Hint: tap anywhere to fire the burner between basket and balloon and lift',
                       child: Text(
                         _gameOver
                             ? 'Tap to restart'
                             : _phase == _Phase.intro
                                 ? 'Rising to the sweet spot…'
-                                : 'Tap for flame · stay in the sweet spot',
+                                : 'Tap to burn · stay in the sweet spot',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.white,
