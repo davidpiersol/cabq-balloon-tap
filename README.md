@@ -38,7 +38,9 @@ chmod +x tool/preview_ios.sh
 ./tool/preview_ios.sh
 ```
 
-Or manually: `flutter run -d ios` after opening Simulator.
+If the project lives under **OneDrive** or **iCloud**, Apple **codesign** often fails with *resource fork / Finder information*. The script mirrors the app to `/tmp/balloon_tap_sim_preview` automatically in that case. You can force the same behavior with `FORCE_IOS_BUILD_TMP=1 ./tool/preview_ios.sh`.
+
+For day-to-day iOS work, a clone under `~/Developer/` (local disk only) is the most reliable.
 
 ## Coordination
 

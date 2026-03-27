@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/scheduler.dart';
@@ -75,7 +76,7 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
       _best = loaded;
       _ready = true;
     });
-    _ticker.start();
+    unawaited(_ticker.start());
   }
 
   void _onTick(Duration _) {
@@ -129,7 +130,7 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
       _gameOver = false;
       _prevFrameTime = null;
     });
-    _ticker.start();
+    unawaited(_ticker.start());
   }
 
   @override
@@ -141,10 +142,10 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     if (!_ready) {
-      return const Center(
+      return Center(
         child: Semantics(
           label: 'Loading best score',
-          child: CircularProgressIndicator(),
+          child: const CircularProgressIndicator(),
         ),
       );
     }
@@ -336,14 +337,14 @@ class _SkyPainter extends CustomPainter {
       ..close();
     canvas.drawPath(
       path,
-      Paint()..color = Colors.black.withOpacity(0.18),
+      Paint()..color = Colors.black.withValues(alpha: 0.18),
     );
 
     // Sun
     canvas.drawCircle(
       Offset(size.width * 0.82, size.height * 0.14),
       math.min(size.width, size.height) * 0.06,
-      Paint()..color = Colors.white.withOpacity(0.35),
+      Paint()..color = Colors.white.withValues(alpha: 0.35),
     );
   }
 
