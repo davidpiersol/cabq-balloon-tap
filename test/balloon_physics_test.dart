@@ -3,10 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('BalloonPhysics', () {
-    test('applyGravity increases downward velocity', () {
+    test('applyDescentPull pulls vy toward downward target (symmetric to burner)', () {
       var vy = 0.0;
-      vy = BalloonPhysics.applyGravity(vy, 0.016);
+      for (var i = 0; i < 200; i++) {
+        vy = BalloonPhysics.applyDescentPull(vy, 0.016);
+      }
       expect(vy, greaterThan(0));
+      expect(vy, lessThanOrEqualTo(BalloonPhysics.maxVy));
+      expect(vy, closeTo(-BalloonPhysics.burnerTargetVy, 2e-5));
     });
 
     test('applyBurnerLift pulls vy toward upward target', () {

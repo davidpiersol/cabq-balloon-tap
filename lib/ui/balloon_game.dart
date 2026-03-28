@@ -14,6 +14,7 @@ import 'balloon/balloon_envelope_painter.dart';
 import 'balloon/balloon_layout.dart';
 import 'balloon/customize_sheet.dart';
 import 'balloon/flame_painter.dart';
+import 'collectible_sprite_painter.dart';
 import 'parallax_background_painter.dart';
 
 enum BalloonSkin {
@@ -36,7 +37,7 @@ extension on BalloonSkin {
       };
 }
 
-/// Hold to burn (sustained flame); release → short coast then gravity drift.
+/// Hold to burn (sustained flame); release → short coast then matched descent (same speed as climb).
 /// Parallax background scrolls left for horizontal illusion.
 class BalloonGame extends StatefulWidget {
   const BalloonGame({super.key});
@@ -52,7 +53,7 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
   double _yNorm = BalloonPhysics.groundStartYNorm;
   double _vy = 0;
   // ignore: prefer_final_fields
-  double _balloonXNorm = 0.5;
+  double _balloonXNorm = 0.25;
 
   int _score = 0;
   int _best = 0;
@@ -70,6 +71,7 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
   final CollectibleWorld _world = CollectibleWorld();
 
   double _layoutWidth = 400;
+  double _layoutHeight = 800;
 
   @override
   void initState() {
@@ -100,10 +102,17 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
     if (dt <= 0 || dt > 0.05) return;
 
     final w = _layoutWidth;
+    final h = _layoutHeight;
     final nextElapsed = _elapsedSec + dt;
     final nextScroll = _scrollPx + w * BalloonPhysics.parallaxScrollPerSec * dt;
-    _world.scrollXNnorm = (nextScroll / w) % 1.0;
-    _world.tick(dt);
+    final collectBonus = _world.tickAndCollect(
+      dt: dt,
+      screenWidth: w,
+      screenHeight: h,
+      scrollPx: nextScroll,
+      balloonXNorm: _balloonXNorm,
+      balloonYNorm: _yNorm,
+    );
 
     var nextCoast = _coastRemaining;
     if (!_burnHeld && nextCoast > 0) {
@@ -117,7 +126,7 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
     } else if (nextCoast > 0) {
       nextVy = BalloonPhysics.applyCoastDamping(_vy, dt);
     } else {
-      nextVy = BalloonPhysics.applyGravity(_vy, dt);
+      nextVy = BalloonPhysics.applyDescentPull(_vy, dt);
     }
 
     final nextY = BalloonPhysics.stepPosition(_yNorm, nextVy, dt);
@@ -130,18 +139,26 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
         _coastRemaining = nextCoast;
         _yNorm = nextY;
         _vy = nextVy;
+        if (collectBonus > 0) {
+          _score += collectBonus;
+          if (_score > _best) _best = _score;
+          HapticFeedback.lightImpact();
+        }
       });
       _endRound();
       return;
     }
 
+    if (collectBonus > 0) {
+      HapticFeedback.lightImpact();
+    }
     setState(() {
       _elapsedSec = nextElapsed;
       _scrollPx = nextScroll;
       _coastRemaining = nextCoast;
       _yNorm = nextY;
       _vy = nextVy;
-      _score += BalloonPhysics.scoreDeltaForFrame(dt);
+      _score += BalloonPhysics.scoreDeltaForFrame(dt) + collectBonus;
       if (_score > _best) _best = _score;
     });
   }
@@ -231,6 +248,7 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
         final h = constraints.maxHeight;
         final w = constraints.maxWidth;
         _layoutWidth = w;
+        _layoutHeight = h;
         final balloonY = h * _yNorm;
         final size = Size(w, h);
         final burner = BalloonLayout.burnerScreenOffset(
@@ -251,6 +269,15 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
                   skyBottom: skyBottom,
                   scrollPx: _scrollPx,
                   timeSec: _elapsedSec,
+                ),
+                size: size,
+              ),
+            ),
+            IgnorePointer(
+              child: CustomPaint(
+                painter: CollectiblesPainter(
+                  instances: List.of(_world.active),
+                  scrollPx: _scrollPx,
                 ),
                 size: size,
               ),
@@ -367,7 +394,7 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
                   Semantics(
                     label: _gameOver
                         ? 'Hint: tap to play again'
-                        : 'Hold to burn and rise. Release to coast, then drift down. Background scrolls for forward motion.',
+                        : 'Hold to burn and rise. Release to coast, then descend at the same speed. Background scrolls for forward motion.',
                     child: Text(
                       _gameOver
                           ? 'Tap to restart'
