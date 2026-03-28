@@ -25,7 +25,7 @@ abstract final class BalloonPhysics {
 
   /// Same easing as [applyBurnerLift], toward +[burnerTargetVy] so descent matches ascent.
   static double applyDescentPull(double vy, double dt) {
-    final target = -burnerTargetVy;
+    const target = -burnerTargetVy;
     final blend = 1.0 - math.exp(-burnerResponse * dt);
     return (vy + (target - vy) * blend).clamp(-maxVy, maxVy);
   }

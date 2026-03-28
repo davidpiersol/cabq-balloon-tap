@@ -28,13 +28,15 @@ class GameShell extends StatelessWidget {
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      isScrollControlled: true,
       builder: (ctx) {
         return Padding(
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               Text(
                 'City of Albuquerque',
                 style: Theme.of(ctx).textTheme.labelLarge?.copyWith(
@@ -75,12 +77,19 @@ class GameShell extends StatelessWidget {
               const SizedBox(height: 8),
               TextButton.icon(
                 onPressed: () async {
-                  await openCabqLearnMore('https://www.cabq.gov/');
+                  final ok = await openCabqLearnMore('https://www.cabq.gov/');
+                  if (!ctx.mounted) return;
+                  if (!ok) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      const SnackBar(content: Text('Could not open link.')),
+                    );
+                  }
                 },
                 icon: const Icon(Icons.public),
                 label: const Text('cabq.gov home'),
               ),
             ],
+            ),
           ),
         );
       },

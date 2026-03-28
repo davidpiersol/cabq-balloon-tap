@@ -10,12 +10,14 @@ if ! command -v flutter >/dev/null 2>&1; then
 fi
 
 # OneDrive/iCloud paths often add xattrs that make codesign fail ("resource fork... not allowed").
-# Build/run from /tmp when needed (or set FORCE_IOS_BUILD_TMP=1).
+# A shallow copy under $HOME avoids that and keeps CocoaPods relative paths to ~/.pub-cache valid
+# (deep /tmp paths can resolve past / and break as /.pub-cache).
 if [[ "$ROOT" == *OneDrive* ]] || [[ "$ROOT" == *iCloud* ]] || [[ "${FORCE_IOS_BUILD_TMP:-}" == 1 ]]; then
-  TMP_ROOT="/tmp/balloon_tap_sim_preview"
-  echo "Using $TMP_ROOT for iOS (avoids cloud-sync codesign issues)…"
+  TMP_ROOT="${HOME}/bt_sim"
+  echo "Using $TMP_ROOT for iOS (avoids cloud codesign + bad pod paths)…"
   rsync -a --delete --exclude=.git --exclude=build "$ROOT/" "$TMP_ROOT/"
   cd "$TMP_ROOT"
+  rm -rf ios/Pods ios/Podfile.lock 2>/dev/null || true
 fi
 
 if [ ! -d ios ]; then
@@ -24,4 +26,9 @@ fi
 flutter pub get
 flutter test
 open -a Simulator 2>/dev/null || true
-flutter run -d ios
+BOOTED_SIM="$(xcrun simctl list devices booted 2>/dev/null | sed -En 's/.*\(([A-F0-9-]{36})\) \(Booted\).*/\1/p' | head -1)"
+if [[ -n "${BOOTED_SIM}" ]]; then
+  flutter run -d "${BOOTED_SIM}"
+else
+  flutter run -d ios
+fi

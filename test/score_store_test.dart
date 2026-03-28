@@ -18,4 +18,21 @@ void main() {
     expect(await ScoreStore.saveIfBest(100), 100);
     expect(await ScoreStore.loadBest(), 100);
   });
+
+  test('sanitizeScore clamps range', () {
+    expect(ScoreStore.sanitizeScore(-5), 0);
+    expect(ScoreStore.sanitizeScore(ScoreStore.maxReasonableScore + 1), ScoreStore.maxReasonableScore);
+  });
+
+  test('loadBest repairs corrupted huge stored value', () async {
+    SharedPreferences.setMockInitialValues({
+      'balloon_tap_best_score_v1': 999999999999,
+    });
+    expect(await ScoreStore.loadBest(), ScoreStore.maxReasonableScore);
+  });
+
+  test('saveIfBest ignores negative scores', () async {
+    expect(await ScoreStore.saveIfBest(-1), 0);
+    expect(await ScoreStore.loadBest(), 0);
+  });
 }

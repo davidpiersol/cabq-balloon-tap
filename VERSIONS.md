@@ -1,7 +1,8 @@
 # Version list
 
-| Version   | Build | Summary                                      |
-| --------- | ----- | -------------------------------------------- |
+| Version        | Build | Summary |
+| -------------- | ----- | ------- |
+| **1.1.0-beta.1** | +101 | App Store / TestFlight hardening, privacy manifest, security docs, beta versioning |
 | **0.2.0** | +1    | Hold-burn + coast + parallax mountains; player ground start |
 | **0.1.0** | +4    | Flame anchored at basket–envelope; tap anywhere to burn |
 | **0.1.0** | +3    | Burner-style brief flame (vertical jet, fast fade) |

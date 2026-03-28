@@ -6,9 +6,15 @@ final _allowedHosts = <String>{
   'cabq.gov',
 };
 
+/// True only for fixed https://cabq.gov or https://www.cabq.gov URLs on port 443, no credentials.
 bool isAllowedCabqUrl(Uri uri) {
   if (uri.scheme != 'https') return false;
-  return _allowedHosts.contains(uri.host.toLowerCase());
+  if (uri.userInfo.isNotEmpty) return false;
+  if (!uri.hasAuthority || uri.host.isEmpty) return false;
+  final port = uri.hasPort ? uri.port : 443;
+  if (port != 443) return false;
+  final host = uri.host.toLowerCase();
+  return _allowedHosts.contains(host);
 }
 
 Future<bool> openCabqLearnMore(String url) async {

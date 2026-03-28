@@ -1,45 +1,107 @@
+import 'dart:math' as math;
+
 import 'collectible_catalog.dart';
 
-/// One spawned pickup in scroll space (v0.2+). v0.1: list stays empty.
 class CollectibleInstance {
-  const CollectibleInstance({
+  CollectibleInstance({
     required this.id,
     required this.kind,
-    required this.xNorm,
+    required this.worldX,
     required this.yNorm,
   });
 
   final String id;
   final CollectibleKind kind;
 
-  /// 0 = left, 1 = right of playfield (world space before scroll).
-  final double xNorm;
+  /// Horizontal position in the same pixel space as [scrollPx] (world scroll).
+  final double worldX;
 
-  /// Same vertical convention as balloon: 0 top, 1 bottom.
+  /// 0 = top, 1 = bottom of screen.
   final double yNorm;
 }
 
-/// Hooks for horizontal scrolling + collection (v0.2). Tick is called every frame from the game loop.
+/// Spawns a modest stream of NM-themed pickups; scroll matches background parallax.
 class CollectibleWorld {
   CollectibleWorld();
 
   final List<CollectibleInstance> active = [];
 
   double scrollXNnorm = 0;
+  double _spawnCountdown = 0.6;
+  int _nextId = 0;
+  final math.Random _rng = math.Random();
 
-  /// Advance world time; spawn/move/collect logic will live here in v0.2.
-  void tick(double dt) {
-    // ignore: unused_local_variable — API surface for upcoming scroll
-    final _ = dt;
-  }
+  /// Cap so the sky never feels crowded.
+  static const int maxActive = 6;
+
+  static const double spawnMinSec = 1.75;
+  static const double spawnMaxSec = 2.65;
+
+  static const List<CollectibleKind> spawnPool = [
+    CollectibleKind.redChile,
+    CollectibleKind.greenChile,
+    CollectibleKind.zia,
+    CollectibleKind.route66,
+    CollectibleKind.roadRunner,
+    CollectibleKind.sandia,
+    CollectibleKind.burqueHeart,
+    CollectibleKind.hotAirBalloon,
+    CollectibleKind.taco,
+    CollectibleKind.coin,
+  ];
 
   void clear() {
     active.clear();
     scrollXNnorm = 0;
+    _spawnCountdown = 0.6;
+    _nextId = 0;
   }
 
-  /// Future: remove instance and return score delta.
-  int collect(CollectibleInstance item) {
-    return item.kind.placeholderPoints;
+  /// Returns bonus score from pickups collected this frame.
+  int tickAndCollect({
+    required double dt,
+    required double screenWidth,
+    required double screenHeight,
+    required double scrollPx,
+    required double balloonXNorm,
+    required double balloonYNorm,
+  }) {
+    scrollXNnorm = screenWidth > 0 ? (scrollPx / screenWidth) % 1.0 : 0;
+
+    _spawnCountdown -= dt;
+    if (_spawnCountdown <= 0 && active.length < maxActive) {
+      _spawnCountdown = spawnMinSec + _rng.nextDouble() * (spawnMaxSec - spawnMinSec);
+      final kind = spawnPool[_rng.nextInt(spawnPool.length)];
+      final margin = 24.0 + _rng.nextDouble() * 100;
+      active.add(
+        CollectibleInstance(
+          id: 'c${_nextId++}',
+          kind: kind,
+          worldX: scrollPx + screenWidth + margin,
+          yNorm: 0.16 + _rng.nextDouble() * 0.58,
+        ),
+      );
+    }
+
+    active.removeWhere((c) => c.worldX - scrollPx < -64);
+
+    final bCx = balloonXNorm * screenWidth;
+    final bCy = balloonYNorm * screenHeight - screenHeight * 0.055;
+    const collectR = 56.0;
+
+    var bonus = 0;
+    active.removeWhere((c) {
+      final sx = c.worldX - scrollPx;
+      final sy = c.yNorm * screenHeight;
+      final dx = sx - bCx;
+      final dy = sy - bCy;
+      if (dx * dx + dy * dy < collectR * collectR) {
+        bonus += c.kind.points;
+        return true;
+      }
+      return false;
+    });
+
+    return bonus;
   }
 }

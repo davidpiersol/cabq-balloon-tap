@@ -52,15 +52,22 @@ class BalloonAppearance {
         'basket': basketArgb,
       };
 
+  static int _clampArgb(num? v, int fallback) {
+    if (v == null) return fallback;
+    final i = v.toInt();
+    if (i < 0 || i > 0xFFFFFFFF) return fallback;
+    return i;
+  }
+
   static BalloonAppearance fromJson(Map<String, dynamic> json) {
     final p = BalloonPattern.values.asNameMap()[json['pattern'] as String?] ??
         BalloonPattern.solid;
     return BalloonAppearance(
       pattern: p,
-      colorA: (json['a'] as num?)?.toInt() ?? defaultLook.colorA,
-      colorB: (json['b'] as num?)?.toInt() ?? defaultLook.colorB,
-      colorC: (json['c'] as num?)?.toInt() ?? defaultLook.colorC,
-      basketArgb: (json['basket'] as num?)?.toInt() ?? defaultLook.basketArgb,
+      colorA: _clampArgb(json['a'] as num?, defaultLook.colorA),
+      colorB: _clampArgb(json['b'] as num?, defaultLook.colorB),
+      colorC: _clampArgb(json['c'] as num?, defaultLook.colorC),
+      basketArgb: _clampArgb(json['basket'] as num?, defaultLook.basketArgb),
     );
   }
 

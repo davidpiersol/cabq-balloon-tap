@@ -1,8 +1,14 @@
 # Changelog
 
-All notable changes to **Balloon Tap** are listed here. Version numbers follow **0.x** until the first store release.
+All notable changes to **Balloon Tap** are listed here.
 
 Rollback tag before this release: **`rollback/pre-hold-parallax-2026-03-27`** (v0.1.0+4 behavior).
+
+## 1.1.0-beta.1+101 — 2026-03-28 (TestFlight / beta)
+
+- **Store & security prep**: URL hardening (HTTPS, host allowlist, port 443, no credentials); bounded local prefs (score + appearance JSON); `PrivacyInfo.xcprivacy` (User Defaults, reason CA92.1); `ITSAppUsesNonExemptEncryption` = false; iOS **15** minimum; Android `networkSecurityConfig` disables cleartext; Podfile no longer disables pod code signing (required for Archive).
+- **Docs**: `docs/SECURITY_REVIEW.md`, `docs/APP_STORE_RELEASE.md`.
+- **Simulation tests**: long-run physics stability + About sheet smoke test.
 
 ## 0.2.0+1 — 2026-03-27
 

@@ -1,30 +1,41 @@
-/// Future pickups (v0.2+). Values are stable for save-game compatibility.
+/// Pickup kinds — stable enum order for any future persistence.
 enum CollectibleKind {
-  coin,
-  taco,
   redChile,
   greenChile,
   zia,
-  hotAirBalloon,
-  sandia,
   route66,
+  roadRunner,
+  sandia,
   burqueHeart,
+  hotAirBalloon,
+  taco,
+  coin,
 }
 
 extension CollectibleKindX on CollectibleKind {
-  /// Human label for debug / future UI.
   String get label => switch (this) {
-        CollectibleKind.coin => 'Coin',
-        CollectibleKind.taco => 'Taco',
         CollectibleKind.redChile => 'Red chile',
         CollectibleKind.greenChile => 'Green chile',
         CollectibleKind.zia => 'Zia',
-        CollectibleKind.hotAirBalloon => 'Balloon',
-        CollectibleKind.sandia => 'Sandia',
         CollectibleKind.route66 => 'Route 66',
+        CollectibleKind.roadRunner => 'Roadrunner',
+        CollectibleKind.sandia => 'Sandía',
         CollectibleKind.burqueHeart => 'Burque',
+        CollectibleKind.hotAirBalloon => 'Balloon',
+        CollectibleKind.taco => 'Taco',
+        CollectibleKind.coin => 'Coin',
       };
 
-  /// Placeholder points until balancing in v0.2+.
-  int get placeholderPoints => 1;
+  int get points => switch (this) {
+        CollectibleKind.zia => 5,
+        CollectibleKind.route66 => 4,
+        CollectibleKind.roadRunner => 4,
+        CollectibleKind.sandia => 3,
+        CollectibleKind.redChile => 2,
+        CollectibleKind.greenChile => 2,
+        CollectibleKind.burqueHeart => 3,
+        CollectibleKind.hotAirBalloon => 2,
+        CollectibleKind.taco => 2,
+        CollectibleKind.coin => 1,
+      };
 }

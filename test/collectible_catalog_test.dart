@@ -3,18 +3,26 @@ import 'package:balloon_tap/game/collectibles/collectible_world.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('CollectibleKind labels are non-empty', () {
+  test('CollectibleKind labels and points are valid', () {
     for (final k in CollectibleKind.values) {
       expect(k.label.isNotEmpty, isTrue);
-      expect(k.placeholderPoints, greaterThan(0));
+      expect(k.points, greaterThan(0));
     }
   });
 
-  test('CollectibleWorld tick is safe with empty active list', () {
+  test('CollectibleWorld tickAndCollect is safe with no overlap', () {
     final w = CollectibleWorld();
-    w.tick(0.016);
-    expect(w.active, isEmpty);
+    w.tickAndCollect(
+      dt: 0.016,
+      screenWidth: 400,
+      screenHeight: 800,
+      scrollPx: 0,
+      balloonXNorm: 0.25,
+      balloonYNorm: 0.9,
+    );
+    expect(w.active.length, lessThanOrEqualTo(CollectibleWorld.maxActive));
     w.clear();
     expect(w.scrollXNnorm, 0);
+    expect(w.active, isEmpty);
   });
 }
