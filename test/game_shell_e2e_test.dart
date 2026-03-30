@@ -25,7 +25,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('Balloon Tap 2.0'), findsWidgets);
+    expect(find.text('Balloon Tap'), findsWidgets);
+    expect(find.text('New Mexico balloon adventure'), findsOneWidget);
     expect(find.text('Balloon Museum — cabq.gov'), findsOneWidget);
     expect(find.text('cabq.gov home'), findsOneWidget);
   });

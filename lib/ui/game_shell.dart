@@ -59,9 +59,16 @@ class _GameShellState extends State<GameShell> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Balloon Tap 2.0',
+                  'Balloon Tap',
                   style: Theme.of(ctx).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'New Mexico balloon adventure',
+                  style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
+                        color: Theme.of(ctx).colorScheme.onSurfaceVariant,
                       ),
                 ),
                 const SizedBox(height: 12),
