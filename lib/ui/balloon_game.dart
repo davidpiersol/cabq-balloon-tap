@@ -37,15 +37,18 @@ extension on BalloonSkin {
       };
 
   (Color, Color) get skyColors => switch (this) {
-        BalloonSkin.fiesta => (CabqTheme.skyTop, CabqTheme.skyBottom),
-        BalloonSkin.sandiaSunset => (const Color(0xFFFFB347), const Color(0xFF6B2D5C)),
-        BalloonSkin.rioDawn => (const Color(0xFF1E3A5F), const Color(0xFF4A90D9)),
+        // Fiesta: deep cerulean to warm golden sand
+        BalloonSkin.fiesta => (const Color(0xFF4A8FC7), const Color(0xFFE8B46A)),
+        // Sandia Sunset: deep orange to rich magenta-purple
+        BalloonSkin.sandiaSunset => (const Color(0xFFFF8C3A), const Color(0xFF5C1F52)),
+        // Rio Dawn: pre-dawn indigo to cobalt
+        BalloonSkin.rioDawn => (const Color(0xFF152340), const Color(0xFF3A7CC4)),
       };
 
   Color? get skyHorizon => switch (this) {
-        BalloonSkin.fiesta => const Color(0xFFFFE8CC),
-        BalloonSkin.sandiaSunset => const Color(0xFFFF8FA3),
-        BalloonSkin.rioDawn => const Color(0xFF4A7AB8),
+        BalloonSkin.fiesta => const Color(0xFFFFD4A0),
+        BalloonSkin.sandiaSunset => const Color(0xFFE8566A),
+        BalloonSkin.rioDawn => const Color(0xFF2D5A8E),
       };
 }
 
@@ -307,6 +310,7 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
                 painter: CollectiblesPainter(
                   instances: List.of(_world.active),
                   scrollPx: _scrollPx,
+                  timeSec: _elapsedSec,
                 ),
                 size: size,
               ),
@@ -327,11 +331,16 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
               top: balloonY - BalloonLayout.positionedTopOffset,
               child: IgnorePointer(
                 child: Transform.scale(
-                  scale: 1.0 + 0.028 * _flameStrength,
+                  scale: 1.0 + 0.026 * _flameStrength,
                   alignment: Alignment.bottomCenter,
                   child: CustomPaint(
                     size: const Size(BalloonLayout.width, BalloonLayout.height),
-                    painter: BalloonEnvelopePainter(appearance: _appearance),
+                    painter: BalloonEnvelopePainter(
+                      appearance: _appearance,
+                      // Gentle sway: ±2.5° sinusoidal with velocity influence
+                      swayDeg: math.sin(_elapsedSec * 1.4) * 2.5 +
+                          (_vy * 8).clamp(-4.0, 4.0),
+                    ),
                   ),
                 ),
               ),
@@ -393,15 +402,19 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
                   label:
                       'Game over. Score $_score. Personal best $_best. Use the Play again button.',
                   child: Card(
-                    margin: const EdgeInsets.all(24),
+                    elevation: 16,
+                    margin: const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
                     child: Padding(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.fromLTRB(28, 28, 28, 24),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (_newBestOnLastGameOver) ...[
                             SizedBox(
-                              height: 72,
+                              height: 80,
                               child: Lottie.asset(
                                 OnboardingOverlay.lottieAsset,
                                 repeat: false,
@@ -409,27 +422,52 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
                               ),
                             ),
                             Text(
-                              'New personal best!',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              '★  New personal best!',
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                     color: CabqTheme.accent,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.4,
                                   ),
+                              textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
+                          ] else ...[
+                            Text(
+                              'Balloon Down!',
+                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 4),
                           ],
-                          Text(
-                            'Balloon down!',
-                            style: Theme.of(context).textTheme.headlineSmall,
+                          const Divider(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _ScoreStat(label: 'Score', value: _score),
+                              Container(
+                                width: 1,
+                                height: 40,
+                                color: Colors.black12,
+                              ),
+                              _ScoreStat(label: 'Best', value: _best),
+                            ],
                           ),
-                          const SizedBox(height: 8),
-                          Text('Score: $_score · Best: $_best'),
-                          const SizedBox(height: 16),
-                          FilledButton(
+                          const SizedBox(height: 20),
+                          FilledButton.icon(
                             onPressed: () {
                               HapticFeedback.mediumImpact();
                               _restart();
                             },
-                            child: const Text('Play again'),
+                            icon: const Icon(Icons.replay_rounded, size: 18),
+                            label: const Text('Play again',
+                                style: TextStyle(fontWeight: FontWeight.w700)),
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size.fromHeight(48),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14)),
+                            ),
                           ),
                         ],
                       ),
@@ -494,6 +532,35 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
           ],
         );
       },
+    );
+  }
+}
+
+class _ScoreStat extends StatelessWidget {
+  const _ScoreStat({required this.label, required this.value});
+  final String label;
+  final int value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '$value',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5,
+              ),
+        ),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: Colors.black45,
+                letterSpacing: 0.8,
+              ),
+        ),
+      ],
     );
   }
 }

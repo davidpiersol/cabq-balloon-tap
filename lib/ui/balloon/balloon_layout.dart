@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 /// Must match [BalloonEnvelopePainter] geometry and [BalloonGame] positioning.
 abstract final class BalloonLayout {
-  static const double width = 88;
-  static const double height = width * 1.15;
+  static const double width = 100;
+  static const double height = width * 1.18;
 
   /// [Positioned.left] uses `screenW * xNorm - this`.
   static const double positionedHalfWidth = width / 2;
