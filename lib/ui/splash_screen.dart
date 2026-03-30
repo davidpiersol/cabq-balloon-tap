@@ -237,13 +237,12 @@ class _SplashLoadingBar extends StatelessWidget {
                   ),
                 ),
                 Positioned(
-                  left: (fillW - 14).clamp(0.0, w - 28),
-                  top: -10,
-                  child: Image.asset(
-                    'assets/images/balloon_sprite.png',
-                    width: 28,
-                    height: 36,
-                    fit: BoxFit.contain,
+                  left: (fillW - 12).clamp(0.0, w - 24),
+                  top: -12,
+                  child: const Icon(
+                    Icons.wb_sunny_rounded,
+                    size: 24,
+                    color: Color(0xFFFFB74D),
                   ),
                 ),
               ],
