@@ -3,7 +3,7 @@ description: >
   Balloon Tap — keep the balloon aloft with CABQ / Balloon Fiesta theming.
   One codebase targets iOS and Android.
 publish_to: "none"
-version: 1.1.0-beta.1+101
+version: 2.0.0+200
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -14,6 +14,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   url_launcher: ^6.2.5
   shared_preferences: ^2.2.3
+  rive: ^0.14.4
+  lottie: ^3.3.2
 
 dev_dependencies:
   flutter_test:
@@ -22,3 +24,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/lottie/nm_sparkle.json
+    - assets/rive/hud_accent.riv

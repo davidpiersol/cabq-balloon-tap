@@ -1,15 +1,26 @@
 import 'package:balloon_tap/app.dart';
+import 'package:balloon_tap/data/onboarding_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rive/rive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  testWidgets('About sheet opens from app bar', (tester) async {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() async {
+    await RiveNative.init();
+  });
+
+  testWidgets('About sheet opens from header button', (tester) async {
+    SharedPreferences.setMockInitialValues({
+      OnboardingStore.prefsKeyOnboardingV2Done: true,
+    });
     await tester.pumpWidget(const BalloonTapApp());
-    // BalloonGame runs a continuous Ticker — avoid pumpAndSettle (never idle).
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    await tester.tap(find.byIcon(Icons.info_outline));
+    await tester.tap(find.byKey(const ValueKey<String>('about_cabq_button')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 

@@ -4,7 +4,9 @@ A lightweight **keep-the-balloon-aloft** game with **City of Albuquerque** / Bal
 
 > **Not an official City product** until reviewed and approved by CABQ Communications.
 
-See **`CHANGELOG.md`** and **`VERSIONS.md`** for release history (`0.1.x` → `0.2.x` → …).
+See **`CHANGELOG.md`** and **`VERSIONS.md`** for release history (`0.1.x` → `0.2.x` → **2.0.x**).
+
+**v2 build & Rive setup:** [`docs/BUILD.md`](docs/BUILD.md). Progress log: [`docs/V2_PROGRESS.md`](docs/V2_PROGRESS.md).
 
 ## Platforms
 

@@ -9,21 +9,29 @@ class ParallaxBackgroundPainter extends CustomPainter {
     required this.skyBottom,
     required this.scrollPx,
     required this.timeSec,
+    this.skyHorizon,
   });
 
   final Color skyTop;
   final Color skyBottom;
+  /// Optional mid-sky color (e.g. Sandia pink / warm haze at the horizon).
+  final Color? skyHorizon;
   final double scrollPx;
   final double timeSec;
 
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
+    final colors = skyHorizon == null
+        ? <Color>[skyTop, skyBottom]
+        : <Color>[skyTop, skyHorizon!, skyBottom];
+    final stops = skyHorizon == null ? null : <double>[0.0, 0.52, 1.0];
     canvas.drawRect(
       rect,
       Paint()
         ..shader = LinearGradient(
-          colors: [skyTop, skyBottom],
+          colors: colors,
+          stops: stops,
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ).createShader(rect),
@@ -111,6 +119,7 @@ class ParallaxBackgroundPainter extends CustomPainter {
   bool shouldRepaint(covariant ParallaxBackgroundPainter oldDelegate) =>
       oldDelegate.skyTop != skyTop ||
       oldDelegate.skyBottom != skyBottom ||
+      oldDelegate.skyHorizon != skyHorizon ||
       oldDelegate.scrollPx != scrollPx ||
       (oldDelegate.timeSec - timeSec).abs() > 0.02;
 }

@@ -1,27 +1,37 @@
 import 'package:flutter/material.dart';
 
+import '../data/onboarding_store.dart';
 import '../security/safe_links.dart';
 import '../theme/cabq_theme.dart';
 import 'balloon_game.dart';
+import 'onboarding_overlay.dart';
 
-class GameShell extends StatelessWidget {
+class GameShell extends StatefulWidget {
   const GameShell({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Balloon Tap'),
-        actions: [
-          IconButton(
-            tooltip: 'About and City of Albuquerque links',
-            icon: const Icon(Icons.info_outline),
-            onPressed: () => _showAbout(context),
-          ),
-        ],
-      ),
-      body: const BalloonGame(),
-    );
+  State<GameShell> createState() => _GameShellState();
+}
+
+class _GameShellState extends State<GameShell> {
+  bool? _onboardingDone;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadOnboarding();
+  }
+
+  Future<void> _loadOnboarding() async {
+    final done = await OnboardingStore.isOnboardingComplete();
+    if (!mounted) return;
+    setState(() => _onboardingDone = done);
+  }
+
+  Future<void> _completeOnboarding() async {
+    await OnboardingStore.markOnboardingComplete();
+    if (!mounted) return;
+    setState(() => _onboardingDone = true);
   }
 
   Future<void> _showAbout(BuildContext context) async {
@@ -37,62 +47,108 @@ class GameShell extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              Text(
-                'City of Albuquerque',
-                style: Theme.of(ctx).textTheme.labelLarge?.copyWith(
-                      color: CabqTheme.primary,
-                      letterSpacing: 0.4,
-                    ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Balloon Tap',
-                style: Theme.of(ctx).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Tap anywhere to give the balloon lift. Keep it in the sky — '
-                'don’t let it touch the ground or float away. Skins celebrate '
-                'Balloon Fiesta and Albuquerque skies.',
-                style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(height: 1.4),
-              ),
-              const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: () async {
-                  final ok = await openCabqLearnMore(
-                    'https://www.cabq.gov/culturalservices/balloonmuseum',
-                  );
-                  if (!ctx.mounted) return;
-                  if (!ok) {
-                    ScaffoldMessenger.of(ctx).showSnackBar(
-                      const SnackBar(content: Text('Could not open link.')),
+                Text(
+                  'City of Albuquerque',
+                  style: Theme.of(ctx).textTheme.labelLarge?.copyWith(
+                        color: CabqTheme.primary,
+                        letterSpacing: 0.4,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Balloon Tap',
+                  style: Theme.of(ctx).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Hold the screen to fire the burner and rise. Release to coast briefly, '
+                  'then glide down. Keep the balloon off the ground and collect Albuquerque‑themed '
+                  'pickups for bonus points. Skins celebrate Balloon Fiesta and New Mexico skies.',
+                  style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(height: 1.4),
+                ),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: () async {
+                    final ok = await openCabqLearnMore(
+                      'https://www.cabq.gov/culturalservices/balloonmuseum',
                     );
-                  }
-                },
-                icon: const Icon(Icons.museum_outlined),
-                label: const Text('Balloon Museum — cabq.gov'),
-              ),
-              const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: () async {
-                  final ok = await openCabqLearnMore('https://www.cabq.gov/');
-                  if (!ctx.mounted) return;
-                  if (!ok) {
-                    ScaffoldMessenger.of(ctx).showSnackBar(
-                      const SnackBar(content: Text('Could not open link.')),
-                    );
-                  }
-                },
-                icon: const Icon(Icons.public),
-                label: const Text('cabq.gov home'),
-              ),
-            ],
+                    if (!ctx.mounted) return;
+                    if (!ok) {
+                      ScaffoldMessenger.of(ctx).showSnackBar(
+                        const SnackBar(content: Text('Could not open link.')),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.museum_outlined),
+                  label: const Text('Balloon Museum — cabq.gov'),
+                ),
+                const SizedBox(height: 8),
+                TextButton.icon(
+                  onPressed: () async {
+                    final ok = await openCabqLearnMore('https://www.cabq.gov/');
+                    if (!ctx.mounted) return;
+                    if (!ok) {
+                      ScaffoldMessenger.of(ctx).showSnackBar(
+                        const SnackBar(content: Text('Could not open link.')),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.public),
+                  label: const Text('cabq.gov home'),
+                ),
+              ],
             ),
           ),
         );
       },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_onboardingDone == null) {
+      return Scaffold(
+        body: Center(
+          child: Semantics(
+            label: 'Loading',
+            child: const CircularProgressIndicator(),
+          ),
+        ),
+      );
+    }
+
+    return Scaffold(
+      extendBody: true,
+      extendBodyBehindAppBar: true,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          const BalloonGame(),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4, right: 4),
+                child: Material(
+                  color: Colors.black38,
+                  shape: const CircleBorder(),
+                  clipBehavior: Clip.antiAlias,
+                  child: IconButton(
+                    key: const ValueKey<String>('about_cabq_button'),
+                    tooltip: 'About and City of Albuquerque links',
+                    onPressed: () => _showAbout(context),
+                    icon: const Icon(Icons.info_outline, color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (_onboardingDone == false)
+            OnboardingOverlay(onContinue: _completeOnboarding),
+        ],
+      ),
     );
   }
 }

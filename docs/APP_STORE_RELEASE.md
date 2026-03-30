@@ -1,6 +1,8 @@
 # App Store & TestFlight release checklist — Balloon Tap
 
-Use this with **version `1.1.0-beta.1+101`** (marketing string `1.1.0-beta.1`, iOS/Android build **101**) for **beta** distribution; bump build for each upload.
+Use with the current **`pubspec.yaml` `version:`** (see [`VERSIONS.md`](../VERSIONS.md); **2.0.0+200** is the v2 store cut). Bump the **+build** number for each upload.
+
+**v2 data on device:** same `shared_preferences` surface as v1, plus optional **`balloon_tap_onboarding_v2_done`** (boolean) for first-run onboarding — disclose with other on-device gameplay prefs in App Privacy.
 
 ## Before the first upload
 

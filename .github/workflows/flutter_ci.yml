@@ -27,6 +27,9 @@ jobs:
       - name: Dependencies
         run: flutter pub get
 
+      - name: Rive native (macOS, required for flutter test)
+        run: dart run rive_native:setup --verbose --clean --platform macos
+
       - name: Analyze
         run: flutter analyze
 

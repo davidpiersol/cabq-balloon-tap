@@ -4,6 +4,15 @@ All notable changes to **Balloon Tap** are listed here.
 
 Rollback tag before this release: **`rollback/pre-hold-parallax-2026-03-27`** (v0.1.0+4 behavior).
 
+## 2.0.0+200 — 2026-03-30 (Balloon Tap 2.0)
+
+- **Immersive shell**: full-screen play; About moved to a top-right FAB-style control; safe-area aware HUD.
+- **Onboarding**: first-run card with Lottie accent and hold/release/coast copy (`OnboardingStore` + prefs key `balloon_tap_onboarding_v2_done`).
+- **Motion**: `lottie` + `rive` dependencies; placeholder assets (`assets/lottie/nm_sparkle.json`, `assets/rive/hud_accent.riv`); HUD Rive accent uses **Flutter renderer** for stable `flutter test`; Lottie on new personal best at game over.
+- **Visual polish**: three-stop sky gradients per skin, frosted-glass score chips, subtle balloon scale on burner strength, bottom inset helper for future v3 banner (`AdBannerReserve`).
+- **Fix**: “new best” celebration compares to best-at-round-start, not live-updated `_best`.
+- **Tooling**: `dart run rive_native:setup` in CI before tests; docs `docs/BUILD.md`, `docs/V2_PROGRESS.md`, `docs/GIT_AND_FIXES.md`, `docs/THIRD_PARTY_ASSETS.md`.
+
 ## 1.1.0-beta.1+101 — 2026-03-28 (TestFlight / beta)
 
 - **Store & security prep**: URL hardening (HTTPS, host allowlist, port 443, no credentials); bounded local prefs (score + appearance JSON); `PrivacyInfo.xcprivacy` (User Defaults, reason CA92.1); `ITSAppUsesNonExemptEncryption` = false; iOS **15** minimum; Android `networkSecurityConfig` disables cleartext; Podfile no longer disables pod code signing (required for Archive).
