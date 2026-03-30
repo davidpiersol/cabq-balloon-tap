@@ -2,6 +2,7 @@
 
 | Version        | Build | Summary |
 | -------------- | ----- | ------- |
+| **2.0.4** | +204 | Test harness update for splash flow (e2e starts with splash visible, taps PLAY, then validates About flow) |
 | **2.0.3** | +203 | Rebased v2 graphics branch on latest main; finalized frame-1 title flow and removed CABQ-branded concept frame from deck/docs |
 | **2.0.2** | +202 | Build bump after full `flutter test` verification gate |
 | **2.0.1** | +201 | Mass ascension title screen (frame 1 art), no CABQ splash line; docs/ppt trimmed to five frames |

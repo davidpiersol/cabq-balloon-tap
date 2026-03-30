@@ -4,6 +4,11 @@ All notable changes to **Balloon Tap** are listed here.
 
 Rollback tag before this release: **`rollback/pre-hold-parallax-2026-03-27`** (v0.1.0+4 behavior).
 
+## 2.0.4+204 — 2026-03-30
+
+- **Test flow fix**: `game_shell_e2e_test.dart` now forces splash-visible startup (`TitleSplashStore = false`) and taps PLAY before asserting About-sheet behavior.
+- **Validation**: full `flutter test` pass on the rebased branch with updated splash gating.
+
 ## 2.0.3+203 — 2026-03-30
 
 - **Merge/rebase release**: rebased graphics iteration branch onto latest `origin/main` and reconciled docs/code conflicts.

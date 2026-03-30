@@ -16,7 +16,7 @@ void main() {
   testWidgets('About sheet opens from header button', (tester) async {
     SharedPreferences.setMockInitialValues({
       OnboardingStore.prefsKeyOnboardingV2Done: true,
-      TitleSplashStore.prefsKeySplashV2Done: true,
+      TitleSplashStore.prefsKeySplashV2Done: false,
     });
     await tester.pumpWidget(const BalloonTapApp());
     await tester.pump();
