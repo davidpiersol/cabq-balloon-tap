@@ -38,6 +38,9 @@ coverage/
 .env.*
 !.env.example
 
+# Python (local venv for Cursor usage dashboard)
+tool/cursor_usage_dashboard/.venv/
+
 # OS
 .DS_Store
 Thumbs.db
