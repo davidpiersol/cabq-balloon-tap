@@ -63,8 +63,6 @@ End-screen / Lottie moment reference.
 
 Onboarding card reference.
 
----
-
 ## Asset replacement notes
 
 Placeholder Lottie (`assets/lottie/nm_sparkle.json`) and Rive (`assets/rive/hud_accent.riv`) may be swapped for originals matching this palette. See [`THIRD_PARTY_ASSETS.md`](THIRD_PARTY_ASSETS.md).

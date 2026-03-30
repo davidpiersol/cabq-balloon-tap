@@ -7,6 +7,7 @@
 | 3 | `RiveNative.init()` in `main.dart`; CI runs `rive_native:setup` | full `flutter test` |
 | 4 | Immersive `GameShell` (no app bar), About FAB, onboarding | `game_shell_e2e_test.dart`, `onboarding_store_test.dart`, `onboarding_overlay_test.dart` |
 | 5 | Parallax 3-stop sky, glass HUD, balloon burn scale, Rive accent, Lottie new-best, safe-area insets | `widget_test.dart`, existing physics/widget suite |
+| 6 | Title splash aligned to concept frame 1 + splash completion store; removed CABQ-branded frame from concept assets and deck | `title_splash_overlay_test.dart`, `title_splash_store_test.dart`, full `flutter test` |
 
 ## Next (optional)
 

@@ -4,6 +4,12 @@ All notable changes to **Balloon Tap** are listed here.
 
 Rollback tag before this release: **`rollback/pre-hold-parallax-2026-03-27`** (v0.1.0+4 behavior).
 
+## 2.0.3+203 — 2026-03-30
+
+- **Merge/rebase release**: rebased graphics iteration branch onto latest `origin/main` and reconciled docs/code conflicts.
+- **Title flow fix**: splash completion now hydrates into `_splashDismissed` at launch, so returning players skip PLAY gate after first run.
+- **Concept alignment**: retained frame-1 mass-ascension title direction; CABQ-branded concept frame remains removed from deck/docs.
+
 ## 2.0.2+202 — 2026-03-30
 
 - **Build**: verification gate — no code changes; `flutter test` clean after splash rollout.
