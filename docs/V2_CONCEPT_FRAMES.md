@@ -1,8 +1,6 @@
 # Balloon Tap 2.0 — Concept Frames and Design Palette
 
-## City of Albuquerque branding
-
-All screens and store listings must include **"Brought to you by the City of Albuquerque"** with the city crest/shield mark. The branded splash (Frame 6) is the canonical reference for placement and tone.
+Canonical **title screen** is **Frame 1** (mass ascension dawn): full-bleed art + in-app typography **Balloon Tap 2.0** / **Mass Ascension Adventure** + **PLAY** — **no** municipal splash line. Official City of Albuquerque context stays in the **About** sheet and `cabq.gov` links only.
 
 ---
 
@@ -19,8 +17,8 @@ All screens and store listings must include **"Brought to you by the City of Alb
 | **Rio Dawn Top** | `#1E3A5F` | Deep pre-dawn, Rio Dawn skin |
 | **Rio Dawn Mid** | `#4A7AB8` | Mid-sky, Rio Dawn skin |
 | **Rio Dawn Bottom** | `#4A90D9` | Lower sky, Rio Dawn skin |
-| **CABQ Primary** | `#0A5F73` | Teal; primary UI, buttons, titles |
-| **CABQ Accent** | `#D94E1F` | Warm orange; accent text, icons |
+| **Primary (theme)** | `#0A5F73` | Teal; primary UI, buttons, titles |
+| **Accent (theme)** | `#D94E1F` | Warm orange; accent text, icons |
 | **Sand** | `#F4EDE4` | Surface / card backgrounds |
 | **Chile Red** | `#B71C1C` | Red chile collectible |
 | **Chile Green** | `#2E7D32` | Green chile collectible |
@@ -30,48 +28,49 @@ All screens and store listings must include **"Brought to you by the City of Alb
 
 ---
 
-## Concept frames (6 screens)
+## Shipped raster (concept art in app)
 
-All mockup PNGs are in [`docs/concepts/`](concepts/).
+| File | Role |
+| ---- | ---- |
+| [`assets/images/splash_mass_ascension.png`](../assets/images/splash_mass_ascension.png) | Title screen background (from concept frame 1) |
+
+---
+
+## Concept frames (reference PNGs in `docs/concepts/`)
 
 ### 1. Mass Ascension Dawn (Splash / Title)
 **File:** `v2_mockup_1_mass_ascension_dawn.png`
 
-Pre-dawn NM sky gradient (indigo to Sandia pink to peach). Mass ascension balloons at various depths. Hero balloon foreground with active flame. Title "Balloon Tap 2.0" top center. Play CTA lower third.
+Pre-dawn NM sky, mass ascension balloons, hero energy. Drives in-app splash asset above.
 
 ### 2. In-Flight Gameplay (Hero Shot)
 **File:** `v2_mockup_2_inflight_gameplay.png`
 
-Active play: colorful striped balloon with burner flame, frosted-glass HUD chips (Score 128 / Best 412), info and palette controls top-right. Desert parallax with mesas and cacti. Hint text at bottom.
+Gameplay HUD and parallax reference.
 
 ### 3. Sandia Sunset Skin
 **File:** `v2_mockup_3_sandia_sunset.png`
 
-Dramatic orange/coral/magenta/purple sky bands. Ornate sunset-themed balloon envelope. Red chile collectible floating nearby. Sandia ridge silhouette. Demonstrates skin system.
+Sunset skin and collectible reference.
 
 ### 4. Game Over / New Personal Best
 **File:** `v2_mockup_4_gameover_newbest.png`
 
-Darkened overlay, centered celebration card with gold confetti/star burst. "New personal best!" headline, Score 512 / Best 512, teal "Play again" CTA. Represents Lottie celebration moment.
+End-screen / Lottie moment reference.
 
 ### 5. First-Run Onboarding
 **File:** `v2_mockup_5_onboarding.png`
 
-Semi-transparent overlay over Balloon Fiesta backdrop. Rounded card with balloon illustration, "Balloon Tap" title, "New Mexico skies, Balloon Fiesta energy" subtitle, three sun-icon instruction bullets, "Let's fly" CTA.
-
-### 6. City of Albuquerque Branded Splash
-**File:** `v2_mockup_6_cabq_branding.png`
-
-NM dawn sky with mass ascension balloons. **"Brought to you by the City of Albuquerque"** in elegant script with city crest/shield. "Balloon Tap 2.0" title below in gold. Play button and audio toggle. Zia-themed balloons visible. Official civic tone with game energy.
+Onboarding card reference.
 
 ---
 
 ## Asset replacement notes
 
-The Lottie (`assets/lottie/nm_sparkle.json`) and Rive (`assets/rive/hud_accent.riv`) files are **placeholders**. Replace with original artwork that matches the palette and frames above. See [`THIRD_PARTY_ASSETS.md`](THIRD_PARTY_ASSETS.md).
+Placeholder Lottie (`assets/lottie/nm_sparkle.json`) and Rive (`assets/rive/hud_accent.riv`) may be swapped for originals matching this palette. See [`THIRD_PARTY_ASSETS.md`](THIRD_PARTY_ASSETS.md).
 
 ---
 
 ## v3 banner ad placement
 
-No ads appear in any v2 frame. Future v3 banners will use reserved space below the gameplay area (see `AdBannerReserve`). Banners must **never** overlay the active tap zone during play.
+Future v3 banners use reserved layout only (`AdBannerReserve`). No ads during active play.

@@ -11,6 +11,7 @@
 | New-best celebration never showed | `_best` was updated during play; compare final score to `_roundStartBest` instead of `_score > _best` at game over. |
 | Rive in `flutter test` on macOS | `RiveHudAccent` uses `Factory.flutter` so the VM harness does not hit native Rive renderer assertions; CI still runs `rive_native:setup` for parity with device builds. |
 | Onboarding blocked existing widget tests | `SharedPreferences` mock with `OnboardingStore.prefsKeyOnboardingV2Done: true`. |
+| Splash before HUD in tests | Tap `splash_play_button` before finding score or About controls. |
 
 ## Open (monitor)
 

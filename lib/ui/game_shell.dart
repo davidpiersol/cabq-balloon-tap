@@ -4,6 +4,7 @@ import '../data/onboarding_store.dart';
 import '../security/safe_links.dart';
 import '../theme/cabq_theme.dart';
 import 'balloon_game.dart';
+import 'mass_ascension_splash.dart';
 import 'onboarding_overlay.dart';
 
 class GameShell extends StatefulWidget {
@@ -15,6 +16,9 @@ class GameShell extends StatefulWidget {
 
 class _GameShellState extends State<GameShell> {
   bool? _onboardingDone;
+
+  /// Title screen (concept frame 1) until the player taps PLAY.
+  bool _splashDismissed = false;
 
   @override
   void initState() {
@@ -125,28 +129,33 @@ class _GameShellState extends State<GameShell> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          const BalloonGame(),
-          SafeArea(
-            child: Align(
-              alignment: Alignment.topRight,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 4, right: 4),
-                child: Material(
-                  color: Colors.black38,
-                  shape: const CircleBorder(),
-                  clipBehavior: Clip.antiAlias,
-                  child: IconButton(
-                    key: const ValueKey<String>('about_cabq_button'),
-                    tooltip: 'About and City of Albuquerque links',
-                    onPressed: () => _showAbout(context),
-                    icon: const Icon(Icons.info_outline, color: Colors.white),
+          if (_splashDismissed) const BalloonGame(),
+          if (_splashDismissed)
+            SafeArea(
+              child: Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4, right: 4),
+                  child: Material(
+                    color: Colors.black38,
+                    shape: const CircleBorder(),
+                    clipBehavior: Clip.antiAlias,
+                    child: IconButton(
+                      key: const ValueKey<String>('about_cabq_button'),
+                      tooltip: 'About and Balloon Museum links',
+                      onPressed: () => _showAbout(context),
+                      icon: const Icon(Icons.info_outline, color: Colors.white),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          if (_onboardingDone == false)
+          if (_splashDismissed && _onboardingDone == false)
             OnboardingOverlay(onContinue: _completeOnboarding),
+          if (!_splashDismissed)
+            MassAscensionSplash(
+              onPlay: () => setState(() => _splashDismissed = true),
+            ),
         ],
       ),
     );

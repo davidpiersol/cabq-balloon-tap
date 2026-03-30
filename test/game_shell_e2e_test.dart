@@ -20,6 +20,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
+    await tester.tap(find.byKey(const ValueKey<String>('splash_play_button')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 120));
+
     await tester.tap(find.byKey(const ValueKey<String>('about_cabq_button')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));

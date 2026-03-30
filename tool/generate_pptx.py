@@ -14,7 +14,7 @@ OUT = DOCS / "Balloon_Tap_2.0_Concepts.pptx"
 SLIDES = [
     {
         "title": "Balloon Tap 2.0",
-        "subtitle": "Brought to you by the City of Albuquerque\nConcept Design Review",
+        "subtitle": "Concept design review — mass ascension title (frame 1 references)",
         "image": None,
     },
     {
@@ -43,16 +43,11 @@ SLIDES = [
         "image": CONCEPTS / "v2_mockup_5_onboarding.png",
     },
     {
-        "title": "6 — City of Albuquerque Branded Splash",
-        "subtitle": "Official branding: city crest, 'Brought to you by the City of Albuquerque'.",
-        "image": CONCEPTS / "v2_mockup_6_cabq_branding.png",
-    },
-    {
         "title": "Design Palette",
         "subtitle": (
             "Sky Top #87CEEB  |  Horizon #FFE8CC  |  Sky Bottom #E8B86D\n"
             "Sandia Pink #FF8FA3  |  Sunset Orange #FFB347  |  Magenta #6B2D5C\n"
-            "CABQ Primary #0A5F73  |  Accent #D94E1F  |  Sand #F4EDE4\n"
+            "Primary #0A5F73  |  Accent #D94E1F  |  Sand #F4EDE4\n"
             "Chile Red #B71C1C  |  Chile Green #2E7D32  |  Gold #FFD700"
         ),
         "image": None,
