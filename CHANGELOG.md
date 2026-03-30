@@ -4,6 +4,14 @@ All notable changes to **Balloon Tap** are listed here.
 
 Rollback tag before this release: **`rollback/pre-hold-parallax-2026-03-27`** (v0.1.0+4 behavior).
 
+## 2.0.1+201 — 2026-03-30 (v2 graphics iteration)
+
+- **Concept rollback per design review**: removed CABQ-branded frame 6, keeping **Mass Ascension Dawn** frame 1 as the v2 visual anchor.
+- **PowerPoint refresh**: regenerated `docs/Balloon_Tap_2.0_Concepts.pptx` for 5 concept frames + palette + next steps.
+- **In-app title presentation**: added first-launch cinematic title splash (`TitleSplashOverlay`) with large “Balloon Tap 2.0” heading and Play CTA inspired by frame 1.
+- **Launch gating**: added `TitleSplashStore` (`balloon_tap_title_splash_v2_done`) so the splash appears once, then hands off to onboarding/gameplay.
+- **Tests**: added splash store and splash overlay tests; updated existing shell/widget tests for new splash gate.
+
 ## 2.0.0+200 — 2026-03-30 (Balloon Tap 2.0)
 
 - **Immersive shell**: full-screen play; About moved to a top-right FAB-style control; safe-area aware HUD.

@@ -1,5 +1,6 @@
 import 'package:balloon_tap/app.dart';
 import 'package:balloon_tap/data/onboarding_store.dart';
+import 'package:balloon_tap/data/title_splash_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rive/rive.dart';
@@ -15,6 +16,7 @@ void main() {
   testWidgets('About sheet opens from header button', (tester) async {
     SharedPreferences.setMockInitialValues({
       OnboardingStore.prefsKeyOnboardingV2Done: true,
+      TitleSplashStore.prefsKeySplashV2Done: true,
     });
     await tester.pumpWidget(const BalloonTapApp());
     await tester.pump();

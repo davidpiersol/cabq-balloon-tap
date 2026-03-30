@@ -3,7 +3,7 @@
 
 from pathlib import Path
 from pptx import Presentation
-from pptx.util import Inches, Pt, Emu
+from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN
 
@@ -14,7 +14,7 @@ OUT = DOCS / "Balloon_Tap_2.0_Concepts.pptx"
 SLIDES = [
     {
         "title": "Balloon Tap 2.0",
-        "subtitle": "Brought to you by the City of Albuquerque\nConcept Design Review",
+        "subtitle": "Concept Design Review",
         "image": None,
     },
     {
@@ -41,11 +41,6 @@ SLIDES = [
         "title": "5 — First-Run Onboarding",
         "subtitle": "Hold/release/coast instructions, Balloon Fiesta backdrop, Let's fly.",
         "image": CONCEPTS / "v2_mockup_5_onboarding.png",
-    },
-    {
-        "title": "6 — City of Albuquerque Branded Splash",
-        "subtitle": "Official branding: city crest, 'Brought to you by the City of Albuquerque'.",
-        "image": CONCEPTS / "v2_mockup_6_cabq_branding.png",
     },
     {
         "title": "Design Palette",

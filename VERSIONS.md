@@ -2,6 +2,7 @@
 
 | Version        | Build | Summary |
 | -------------- | ----- | ------- |
+| **2.0.1** | +201 | Removed CABQ-branded concept frame; added first-launch cinematic title splash matching frame 1; refreshed concept deck to 5 frames |
 | **2.0.0** | +200 | v2 visuals: immersive shell, onboarding, Lottie/Rive motion, glass HUD, parallax horizons, ad-slot constants for v3 |
 | **1.1.0-beta.1** | +101 | App Store / TestFlight hardening, privacy manifest, security docs, beta versioning |
 | **0.2.0** | +1    | Hold-burn + coast + parallax mountains; player ground start |

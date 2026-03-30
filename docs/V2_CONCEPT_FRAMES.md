@@ -1,8 +1,6 @@
 # Balloon Tap 2.0 — Concept Frames and Design Palette
 
-## City of Albuquerque branding
-
-All screens and store listings must include **"Brought to you by the City of Albuquerque"** with the city crest/shield mark. The branded splash (Frame 6) is the canonical reference for placement and tone.
+Frame 1 (`v2_mockup_1_mass_ascension_dawn.png`) is the visual north star for the v2 look and feel.
 
 ---
 
@@ -30,7 +28,7 @@ All screens and store listings must include **"Brought to you by the City of Alb
 
 ---
 
-## Concept frames (6 screens)
+## Concept frames (5 screens)
 
 All mockup PNGs are in [`docs/concepts/`](concepts/).
 
@@ -58,13 +56,6 @@ Darkened overlay, centered celebration card with gold confetti/star burst. "New 
 **File:** `v2_mockup_5_onboarding.png`
 
 Semi-transparent overlay over Balloon Fiesta backdrop. Rounded card with balloon illustration, "Balloon Tap" title, "New Mexico skies, Balloon Fiesta energy" subtitle, three sun-icon instruction bullets, "Let's fly" CTA.
-
-### 6. City of Albuquerque Branded Splash
-**File:** `v2_mockup_6_cabq_branding.png`
-
-NM dawn sky with mass ascension balloons. **"Brought to you by the City of Albuquerque"** in elegant script with city crest/shield. "Balloon Tap 2.0" title below in gold. Play button and audio toggle. Zia-themed balloons visible. Official civic tone with game energy.
-
----
 
 ## Asset replacement notes
 

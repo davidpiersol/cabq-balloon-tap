@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../data/onboarding_store.dart';
+import '../data/title_splash_store.dart';
 import '../security/safe_links.dart';
 import '../theme/cabq_theme.dart';
 import 'balloon_game.dart';
 import 'onboarding_overlay.dart';
+import 'title_splash_overlay.dart';
 
 class GameShell extends StatefulWidget {
   const GameShell({super.key});
@@ -15,17 +17,28 @@ class GameShell extends StatefulWidget {
 
 class _GameShellState extends State<GameShell> {
   bool? _onboardingDone;
+  bool? _splashDone;
 
   @override
   void initState() {
     super.initState();
-    _loadOnboarding();
+    _loadGateState();
   }
 
-  Future<void> _loadOnboarding() async {
+  Future<void> _loadGateState() async {
+    final splashDone = await TitleSplashStore.isSplashComplete();
     final done = await OnboardingStore.isOnboardingComplete();
     if (!mounted) return;
-    setState(() => _onboardingDone = done);
+    setState(() {
+      _splashDone = splashDone;
+      _onboardingDone = done;
+    });
+  }
+
+  Future<void> _completeSplash() async {
+    await TitleSplashStore.markSplashComplete();
+    if (!mounted) return;
+    setState(() => _splashDone = true);
   }
 
   Future<void> _completeOnboarding() async {
@@ -50,23 +63,25 @@ class _GameShellState extends State<GameShell> {
                 Text(
                   'City of Albuquerque',
                   style: Theme.of(ctx).textTheme.labelLarge?.copyWith(
-                        color: CabqTheme.primary,
-                        letterSpacing: 0.4,
-                      ),
+                    color: CabqTheme.primary,
+                    letterSpacing: 0.4,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Balloon Tap',
                   style: Theme.of(ctx).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   'Hold the screen to fire the burner and rise. Release to coast briefly, '
                   'then glide down. Keep the balloon off the ground and collect Albuquerque‑themed '
                   'pickups for bonus points. Skins celebrate Balloon Fiesta and New Mexico skies.',
-                  style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(height: 1.4),
+                  style: Theme.of(
+                    ctx,
+                  ).textTheme.bodyMedium?.copyWith(height: 1.4),
                 ),
                 const SizedBox(height: 16),
                 FilledButton.icon(
@@ -108,7 +123,7 @@ class _GameShellState extends State<GameShell> {
 
   @override
   Widget build(BuildContext context) {
-    if (_onboardingDone == null) {
+    if (_onboardingDone == null || _splashDone == null) {
       return Scaffold(
         body: Center(
           child: Semantics(
@@ -145,7 +160,9 @@ class _GameShellState extends State<GameShell> {
               ),
             ),
           ),
-          if (_onboardingDone == false)
+          if (_splashDone == false)
+            TitleSplashOverlay(onStart: _completeSplash),
+          if (_splashDone == true && _onboardingDone == false)
             OnboardingOverlay(onContinue: _completeOnboarding),
         ],
       ),
