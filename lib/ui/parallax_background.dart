@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// Image-based parallax background with three scrolling layers:
-/// sky (slow), mesas (medium), ground (fast).
+/// Image-based parallax background with three layers stacked:
+///   1. Sky — fills entire screen, scrolls slowly
+///   2. Mesas — bottom-aligned, scrolls medium (transparent top blends over sky)
+///   3. Ground — bottom-aligned, scrolls fast (transparent top blends over mesas)
 class ParallaxBackground extends StatelessWidget {
   const ParallaxBackground({
     super.key,
@@ -25,30 +27,40 @@ class ParallaxBackground extends StatelessWidget {
         return Stack(
           fit: StackFit.expand,
           children: [
-            _TilingLayer(
-              asset: skyAsset,
-              scrollPx: scrollPx * 0.05,
-              screenWidth: w,
-              height: h,
-              alignment: Alignment.topCenter,
-              fit: BoxFit.cover,
+            // Layer 1: Sky — covers the entire screen
+            Positioned.fill(
+              child: _ScrollingImage(
+                asset: skyAsset,
+                scrollPx: scrollPx * 0.05,
+                screenWidth: w,
+                fit: BoxFit.cover,
+              ),
             ),
-            _TilingLayer(
-              asset: mesaAsset,
-              scrollPx: scrollPx * 0.3,
-              screenWidth: w,
-              height: h,
-              alignment: Alignment.bottomCenter,
-              fit: BoxFit.fitWidth,
+            // Layer 2: Mesas — bottom 55% of screen
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: h * 0.55,
+              child: _ScrollingImage(
+                asset: mesaAsset,
+                scrollPx: scrollPx * 0.25,
+                screenWidth: w,
+                fit: BoxFit.cover,
+              ),
             ),
-            _TilingLayer(
-              asset: groundAsset,
-              scrollPx: scrollPx * 0.7,
-              screenWidth: w,
-              height: h * 0.35,
-              alignment: Alignment.bottomCenter,
-              fit: BoxFit.fitWidth,
-              bottomAligned: true,
+            // Layer 3: Desert ground — bottom 28% of screen
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: h * 0.28,
+              child: _ScrollingImage(
+                asset: groundAsset,
+                scrollPx: scrollPx * 0.65,
+                screenWidth: w,
+                fit: BoxFit.cover,
+              ),
             ),
           ],
         );
@@ -57,68 +69,36 @@ class ParallaxBackground extends StatelessWidget {
   }
 }
 
-class _TilingLayer extends StatelessWidget {
-  const _TilingLayer({
+/// Horizontally-scrolling image that tiles seamlessly.
+class _ScrollingImage extends StatelessWidget {
+  const _ScrollingImage({
     required this.asset,
     required this.scrollPx,
     required this.screenWidth,
-    required this.height,
-    required this.alignment,
     required this.fit,
-    this.bottomAligned = false,
   });
 
   final String asset;
   final double scrollPx;
   final double screenWidth;
-  final double height;
-  final Alignment alignment;
   final BoxFit fit;
-  final bool bottomAligned;
 
   @override
   Widget build(BuildContext context) {
-    final offset = -(scrollPx % (screenWidth * 2));
-    if (bottomAligned) {
-      return Positioned(
-        left: 0,
-        right: 0,
-        bottom: 0,
-        height: height,
-        child: ClipRect(
-          child: OverflowBox(
-            alignment: Alignment.bottomLeft,
-            maxWidth: screenWidth * 3,
-            child: Transform.translate(
-              offset: Offset(offset, 0),
-              child: Row(
-                children: List.generate(3, (_) => Image.asset(
-                  asset,
-                  width: screenWidth,
-                  height: height,
-                  fit: fit,
-                )),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    return Positioned.fill(
-      child: ClipRect(
+    final tileWidth = screenWidth;
+    final offset = -(scrollPx % tileWidth);
+    return ClipRect(
+      child: Transform.translate(
+        offset: Offset(offset, 0),
         child: OverflowBox(
           alignment: Alignment.centerLeft,
-          maxWidth: screenWidth * 3,
-          child: Transform.translate(
-            offset: Offset(offset, 0),
-            child: Row(
-              children: List.generate(3, (_) => Image.asset(
-                asset,
-                width: screenWidth,
-                height: height,
-                fit: fit,
-              )),
-            ),
+          maxWidth: tileWidth * 3,
+          maxHeight: double.infinity,
+          child: Row(
+            children: List.generate(3, (_) => SizedBox(
+              width: tileWidth,
+              child: Image.asset(asset, fit: fit),
+            )),
           ),
         ),
       ),

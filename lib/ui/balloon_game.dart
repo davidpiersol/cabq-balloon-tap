@@ -12,6 +12,7 @@ import '../game/balloon_physics.dart';
 import '../game/collectibles/collectible_world.dart';
 import '../layout/ad_banner_reserve.dart';
 import '../theme/cabq_theme.dart';
+import 'balloon/balloon_envelope_painter.dart';
 import 'balloon/balloon_layout.dart';
 import 'balloon/customize_sheet.dart';
 import 'balloon/flame_painter.dart';
@@ -71,9 +72,6 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
 
   bool _newBestOnLastGameOver = false;
   int _roundStartBest = 0;
-
-  static const _balloonSpriteWidth = 100.0;
-  static const _balloonSpriteHeight = 130.0;
 
   @override
   void initState() {
@@ -298,19 +296,17 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
                 ),
               ),
             ),
-            // Balloon sprite
+            // Balloon (CustomPainter for true transparency)
             Positioned(
-              left: w * _balloonXNorm - _balloonSpriteWidth / 2,
-              top: balloonY - _balloonSpriteHeight * 0.65,
+              left: w * _balloonXNorm - BalloonLayout.positionedHalfWidth,
+              top: balloonY - BalloonLayout.positionedTopOffset,
               child: IgnorePointer(
                 child: Transform.scale(
                   scale: 1.0 + 0.035 * _flameStrength,
                   alignment: Alignment.bottomCenter,
-                  child: Image.asset(
-                    'assets/images/balloon_sprite.png',
-                    width: _balloonSpriteWidth,
-                    height: _balloonSpriteHeight,
-                    fit: BoxFit.contain,
+                  child: CustomPaint(
+                    size: const Size(BalloonLayout.width, BalloonLayout.height),
+                    painter: BalloonEnvelopePainter(appearance: _appearance),
                   ),
                 ),
               ),
