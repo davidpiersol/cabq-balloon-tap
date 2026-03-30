@@ -15,7 +15,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byType(SplashScreen), findsOneWidget);
-    expect(find.text('Balloon Tap'), findsOneWidget);
+    expect(find.text('Balloon'), findsOneWidget);
+    expect(find.text('Tap'), findsOneWidget);
     expect(find.text('PLAY'), findsOneWidget);
   });
 

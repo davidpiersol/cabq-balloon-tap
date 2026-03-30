@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../theme/cabq_theme.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key, required this.onPlay});
@@ -12,23 +11,42 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _fadeCtrl;
+  late AnimationController _loadCtrl;
 
   @override
   void initState() {
     super.initState();
     _fadeCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 900),
     )..forward();
+    _loadCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat();
   }
 
   @override
   void dispose() {
     _fadeCtrl.dispose();
+    _loadCtrl.dispose();
     super.dispose();
   }
+
+  TextStyle get _titleStyle => GoogleFonts.playfairDisplay(
+        fontSize: 44,
+        fontWeight: FontWeight.w700,
+        height: 1.05,
+        letterSpacing: 0.5,
+        color: const Color(0xFFFFF8E7),
+        shadows: const [
+          Shadow(blurRadius: 18, color: Color(0x88000000), offset: Offset(0, 4)),
+          Shadow(blurRadius: 8, color: Color(0x66000000)),
+          Shadow(blurRadius: 24, color: Color(0x44FFD54F)),
+        ],
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -42,15 +60,16 @@ class _SplashScreenState extends State<SplashScreen>
           width: double.infinity,
           height: double.infinity,
         ),
+        // Light vignette only — keep art visible
         Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Color(0x88000020),
+                Color(0x33000000),
                 Colors.transparent,
-                Color(0x66000020),
+                Color(0x44000000),
               ],
-              stops: [0.0, 0.45, 1.0],
+              stops: [0.0, 0.4, 1.0],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
@@ -59,72 +78,46 @@ class _SplashScreenState extends State<SplashScreen>
         SafeArea(
           child: FadeTransition(
             opacity: CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut),
-            child: Column(
-              children: [
-                const Spacer(flex: 2),
-                Text(
-                  'Balloon Tap',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.5,
-                        shadows: const [
-                          Shadow(blurRadius: 16, color: Colors.black54),
-                          Shadow(blurRadius: 6, color: Colors.black38),
-                        ],
-                      ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '2.0',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        color: CabqTheme.gold,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 8,
-                        shadows: const [
-                          Shadow(blurRadius: 12, color: Colors.black45),
-                        ],
-                      ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'MASS ASCENSION ADVENTURE',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: Colors.white70,
-                        letterSpacing: 3,
-                        fontWeight: FontWeight.w500,
-                      ),
-                ),
-                const Spacer(flex: 3),
-                Padding(
-                  padding: EdgeInsets.only(
-                    bottom: mq.padding.bottom + 48,
-                    left: 48,
-                    right: 48,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 28),
+              child: Column(
+                children: [
+                  SizedBox(height: mq.size.height * 0.08),
+                  // Title — two lines, no version number
+                  Text('Balloon', textAlign: TextAlign.center, style: _titleStyle),
+                  Text('Tap', textAlign: TextAlign.center, style: _titleStyle),
+                  const SizedBox(height: 14),
+                  Text(
+                    'MASS ASCENSION ADVENTURE',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.dmSans(
+                      fontSize: 12,
+                      letterSpacing: 3.2,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xE6FFF8E7),
+                    ),
                   ),
-                  child: SizedBox(
+                  const Spacer(),
+                  // PLAY + TAP TO PLAY (mockup)
+                  SizedBox(
                     width: double.infinity,
-                    height: 56,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFFFFA726), Color(0xFFE65100)],
+                          colors: [Color(0xFFFFB74D), Color(0xFFE65100)],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                         ),
-                        borderRadius: BorderRadius.circular(28),
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: const [
                           BoxShadow(
-                            color: Color(0x66000000),
-                            blurRadius: 12,
-                            offset: Offset(0, 4),
+                            color: Color(0x55000000),
+                            blurRadius: 16,
+                            offset: Offset(0, 6),
                           ),
                           BoxShadow(
-                            color: Color(0x33FFA726),
-                            blurRadius: 20,
+                            color: Color(0x33FF9800),
+                            blurRadius: 24,
                             offset: Offset(0, 2),
                           ),
                         ],
@@ -132,28 +125,40 @@ class _SplashScreenState extends State<SplashScreen>
                       child: Material(
                         color: Colors.transparent,
                         child: InkWell(
-                          borderRadius: BorderRadius.circular(28),
+                          borderRadius: BorderRadius.circular(20),
                           onTap: widget.onPlay,
-                          child: Center(
-                            child: Row(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 18,
+                              horizontal: 24,
+                            ),
+                            child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(
-                                  Icons.play_arrow_rounded,
-                                  color: Colors.white,
-                                  size: 28,
-                                ),
-                                const SizedBox(width: 8),
                                 Text(
                                   'PLAY',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge
-                                      ?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 3,
+                                  style: GoogleFonts.dmSans(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 4,
+                                    color: Colors.white,
+                                    shadows: const [
+                                      Shadow(
+                                        blurRadius: 8,
+                                        color: Colors.black26,
                                       ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'TAP TO PLAY',
+                                  style: GoogleFonts.dmSans(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 2,
+                                    color: Colors.white.withValues(alpha: 0.95),
+                                  ),
                                 ),
                               ],
                             ),
@@ -162,12 +167,90 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 20),
+                  // Loading bar + balloon thumb
+                  _SplashLoadingBar(animation: _loadCtrl),
+                  const SizedBox(height: 10),
+                  Text(
+                    'LOADING...',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.dmSans(
+                      fontSize: 10,
+                      letterSpacing: 2.5,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white.withValues(alpha: 0.85),
+                    ),
+                  ),
+                  SizedBox(height: mq.padding.bottom + 20),
+                ],
+              ),
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SplashLoadingBar extends StatelessWidget {
+  const _SplashLoadingBar({required this.animation});
+
+  final Animation<double> animation;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, _) {
+        final t = animation.value;
+        return LayoutBuilder(
+          builder: (context, c) {
+            final w = c.maxWidth;
+            final fillW = w * (0.25 + 0.65 * ((t * 2) % 1.0));
+            return Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.centerLeft,
+              children: [
+                Container(
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.15),
+                    ),
+                  ),
+                ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      width: fillW.clamp(0.0, w),
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFFFFB74D), Color(0xFFFF6D00)],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: (fillW - 14).clamp(0.0, w - 28),
+                  top: -10,
+                  child: Image.asset(
+                    'assets/images/balloon_sprite.png',
+                    width: 28,
+                    height: 36,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

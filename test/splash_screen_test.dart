@@ -14,9 +14,10 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Balloon Tap'), findsOneWidget);
-    expect(find.text('2.0'), findsOneWidget);
+    expect(find.text('Balloon'), findsOneWidget);
+    expect(find.text('Tap'), findsOneWidget);
     expect(find.text('PLAY'), findsOneWidget);
+    expect(find.text('TAP TO PLAY'), findsOneWidget);
 
     await tester.tap(find.text('PLAY'));
     expect(played, isTrue);
