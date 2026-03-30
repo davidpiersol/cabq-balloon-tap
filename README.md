@@ -6,7 +6,7 @@ A lightweight **keep-the-balloon-aloft** game with **City of Albuquerque** / Bal
 
 See **`CHANGELOG.md`** and **`VERSIONS.md`** for release history (`0.1.x` → `0.2.x` → **2.0.x**).
 
-**v2 build & Rive setup:** [`docs/BUILD.md`](docs/BUILD.md). Progress log: [`docs/V2_PROGRESS.md`](docs/V2_PROGRESS.md).
+**v2 build & Rive setup:** [`docs/BUILD.md`](docs/BUILD.md). Progress log: [`docs/V2_PROGRESS.md`](docs/V2_PROGRESS.md). Five screenshot/concept briefs: [`docs/V2_CONCEPT_FRAMES.md`](docs/V2_CONCEPT_FRAMES.md).
 
 ## Platforms
 
