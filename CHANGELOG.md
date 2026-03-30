@@ -4,6 +4,16 @@ All notable changes to **Balloon Tap** are listed here.
 
 Rollback tag before this release: **`rollback/pre-hold-parallax-2026-03-27`** (v0.1.0+4 behavior).
 
+## 2.1.0+210 — 2026-03-30 (v2 Graphics)
+
+- **Splash screen**: animated mass-ascension dawn (mockup 1) with floating mini-balloons, gradient sky, title + "TAP TO PLAY". Shell state machine: loading → splash → onboarding → playing.
+- **Parallax v2**: sun radial glow, soft cloud wisps, saguaro cactus silhouettes on nearest ridge.
+- **Balloon depth**: specular highlight (upper-left), shadow (lower-right), gradient basket, additional rigging lines.
+- **GameOverCard**: extracted widget with Lottie celebration burst, star icon for new-best, score badges, rounded card.
+- **CabqTheme expansion**: glass decoration helpers, ridge palette tokens, gold/chile colors, card + button themes.
+- **Reverted**: removed CABQ branding frame 6; concept frames trimmed to 5.
+- **Tests**: 35 total — new: splash, game-over card, updated shell E2E + widget tests.
+
 ## 2.0.0+200 — 2026-03-30 (Balloon Tap 2.0)
 
 - **Immersive shell**: full-screen play; About moved to a top-right FAB-style control; safe-area aware HUD.

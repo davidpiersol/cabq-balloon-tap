@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../data/onboarding_store.dart';
 import '../security/safe_links.dart';
-import '../theme/cabq_theme.dart';
 import 'balloon_game.dart';
 import 'onboarding_overlay.dart';
+import 'splash_screen.dart';
+
+enum _ShellState { loading, splash, onboarding, playing }
 
 class GameShell extends StatefulWidget {
   const GameShell({super.key});
@@ -14,24 +16,33 @@ class GameShell extends StatefulWidget {
 }
 
 class _GameShellState extends State<GameShell> {
-  bool? _onboardingDone;
+  _ShellState _state = _ShellState.loading;
 
   @override
   void initState() {
     super.initState();
-    _loadOnboarding();
+    _init();
   }
 
-  Future<void> _loadOnboarding() async {
+  Future<void> _init() async {
     final done = await OnboardingStore.isOnboardingComplete();
     if (!mounted) return;
-    setState(() => _onboardingDone = done);
+    setState(() => _state = _ShellState.splash);
+    if (!done) {
+      // Will show onboarding after splash → play tap
+    }
+  }
+
+  void _onSplashPlay() async {
+    final done = await OnboardingStore.isOnboardingComplete();
+    if (!mounted) return;
+    setState(() => _state = done ? _ShellState.playing : _ShellState.onboarding);
   }
 
   Future<void> _completeOnboarding() async {
     await OnboardingStore.markOnboardingComplete();
     if (!mounted) return;
-    setState(() => _onboardingDone = true);
+    setState(() => _state = _ShellState.playing);
   }
 
   Future<void> _showAbout(BuildContext context) async {
@@ -48,15 +59,7 @@ class _GameShellState extends State<GameShell> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'City of Albuquerque',
-                  style: Theme.of(ctx).textTheme.labelLarge?.copyWith(
-                        color: CabqTheme.primary,
-                        letterSpacing: 0.4,
-                      ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Balloon Tap',
+                  'Balloon Tap 2.0',
                   style: Theme.of(ctx).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -64,8 +67,8 @@ class _GameShellState extends State<GameShell> {
                 const SizedBox(height: 12),
                 Text(
                   'Hold the screen to fire the burner and rise. Release to coast briefly, '
-                  'then glide down. Keep the balloon off the ground and collect Albuquerque‑themed '
-                  'pickups for bonus points. Skins celebrate Balloon Fiesta and New Mexico skies.',
+                  'then glide down. Keep the balloon off the ground and collect New Mexico '
+                  'themed pickups for bonus points.',
                   style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(height: 1.4),
                 ),
                 const SizedBox(height: 16),
@@ -108,47 +111,44 @@ class _GameShellState extends State<GameShell> {
 
   @override
   Widget build(BuildContext context) {
-    if (_onboardingDone == null) {
-      return Scaffold(
-        body: Center(
-          child: Semantics(
-            label: 'Loading',
-            child: const CircularProgressIndicator(),
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          const BalloonGame(),
-          SafeArea(
-            child: Align(
-              alignment: Alignment.topRight,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 4, right: 4),
-                child: Material(
-                  color: Colors.black38,
-                  shape: const CircleBorder(),
-                  clipBehavior: Clip.antiAlias,
-                  child: IconButton(
-                    key: const ValueKey<String>('about_cabq_button'),
-                    tooltip: 'About and City of Albuquerque links',
-                    onPressed: () => _showAbout(context),
-                    icon: const Icon(Icons.info_outline, color: Colors.white),
+      body: switch (_state) {
+        _ShellState.loading => Center(
+            child: Semantics(
+              label: 'Loading',
+              child: const CircularProgressIndicator(),
+            ),
+          ),
+        _ShellState.splash => SplashScreen(onPlay: _onSplashPlay),
+        _ShellState.onboarding => OnboardingOverlay(onContinue: _completeOnboarding),
+        _ShellState.playing => Stack(
+            fit: StackFit.expand,
+            children: [
+              const BalloonGame(),
+              SafeArea(
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 4, right: 4),
+                    child: Material(
+                      color: Colors.black38,
+                      shape: const CircleBorder(),
+                      clipBehavior: Clip.antiAlias,
+                      child: IconButton(
+                        key: const ValueKey<String>('about_cabq_button'),
+                        tooltip: 'About',
+                        onPressed: () => _showAbout(context),
+                        icon: const Icon(Icons.info_outline, color: Colors.white),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-          if (_onboardingDone == false)
-            OnboardingOverlay(onContinue: _completeOnboarding),
-        ],
-      ),
+      },
     );
   }
 }

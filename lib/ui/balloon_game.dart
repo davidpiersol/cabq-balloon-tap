@@ -5,8 +5,6 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lottie/lottie.dart';
-
 import '../data/appearance_store.dart';
 import '../data/score_store.dart';
 import '../game/balloon_appearance.dart';
@@ -19,6 +17,7 @@ import 'balloon/balloon_layout.dart';
 import 'balloon/customize_sheet.dart';
 import 'balloon/flame_painter.dart';
 import 'collectible_sprite_painter.dart';
+import 'game_over_card.dart';
 import 'motion/rive_hud_accent.dart';
 import 'onboarding_overlay.dart';
 import 'parallax_background_painter.dart';
@@ -376,68 +375,16 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
                 ],
               ),
             ),
-            if (_gameOver) ...[
+            if (_gameOver)
               Positioned.fill(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
-                    _restart();
-                  },
-                  child: Container(color: Colors.black.withValues(alpha: 0.22)),
+                child: GameOverCard(
+                  score: _score,
+                  best: _best,
+                  isNewBest: _newBestOnLastGameOver,
+                  onRestart: _restart,
+                  lottieAsset: OnboardingOverlay.lottieAsset,
                 ),
               ),
-              Center(
-                child: Semantics(
-                  liveRegion: true,
-                  label:
-                      'Game over. Score $_score. Personal best $_best. Use the Play again button.',
-                  child: Card(
-                    margin: const EdgeInsets.all(24),
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (_newBestOnLastGameOver) ...[
-                            SizedBox(
-                              height: 72,
-                              child: Lottie.asset(
-                                OnboardingOverlay.lottieAsset,
-                                repeat: false,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                            Text(
-                              'New personal best!',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    color: CabqTheme.accent,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                            const SizedBox(height: 8),
-                          ],
-                          Text(
-                            'Balloon down!',
-                            style: Theme.of(context).textTheme.headlineSmall,
-                          ),
-                          const SizedBox(height: 8),
-                          Text('Score: $_score · Best: $_best'),
-                          const SizedBox(height: 16),
-                          FilledButton(
-                            onPressed: () {
-                              HapticFeedback.mediumImpact();
-                              _restart();
-                            },
-                            child: const Text('Play again'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
             Positioned(
               left: 0,
               right: 0,

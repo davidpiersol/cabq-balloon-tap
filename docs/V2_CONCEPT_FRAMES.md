@@ -1,11 +1,5 @@
 # Balloon Tap 2.0 — Concept Frames and Design Palette
 
-## City of Albuquerque branding
-
-All screens and store listings must include **"Brought to you by the City of Albuquerque"** with the city crest/shield mark. The branded splash (Frame 6) is the canonical reference for placement and tone.
-
----
-
 ## Color palette
 
 | Token | Hex | Usage |
@@ -19,18 +13,22 @@ All screens and store listings must include **"Brought to you by the City of Alb
 | **Rio Dawn Top** | `#1E3A5F` | Deep pre-dawn, Rio Dawn skin |
 | **Rio Dawn Mid** | `#4A7AB8` | Mid-sky, Rio Dawn skin |
 | **Rio Dawn Bottom** | `#4A90D9` | Lower sky, Rio Dawn skin |
-| **CABQ Primary** | `#0A5F73` | Teal; primary UI, buttons, titles |
-| **CABQ Accent** | `#D94E1F` | Warm orange; accent text, icons |
+| **Primary Teal** | `#0A5F73` | Primary UI, buttons, titles |
+| **Accent Orange** | `#D94E1F` | Warm orange; accent text, icons |
 | **Sand** | `#F4EDE4` | Surface / card backgrounds |
 | **Chile Red** | `#B71C1C` | Red chile collectible |
 | **Chile Green** | `#2E7D32` | Green chile collectible |
 | **Gold / Celebration** | `#FFD700` | Confetti, new-best star |
 | **Glass White** | `rgba(255,255,255,0.16)` | Frosted HUD chip fill |
 | **Glass Border** | `rgba(255,255,255,0.24)` | HUD chip border |
+| **Ridge Far** | `#7B9BA8` | Distant mountain silhouette |
+| **Ridge Mid** | `#5C6B73` | Mid-ground mountain |
+| **Ridge Near** | `#3D4549` | Foreground mountain |
+| **Ridge Ground** | `#2A3035` | Closest terrain |
 
 ---
 
-## Concept frames (6 screens)
+## Concept frames (5 screens)
 
 All mockup PNGs are in [`docs/concepts/`](concepts/).
 
@@ -58,11 +56,6 @@ Darkened overlay, centered celebration card with gold confetti/star burst. "New 
 **File:** `v2_mockup_5_onboarding.png`
 
 Semi-transparent overlay over Balloon Fiesta backdrop. Rounded card with balloon illustration, "Balloon Tap" title, "New Mexico skies, Balloon Fiesta energy" subtitle, three sun-icon instruction bullets, "Let's fly" CTA.
-
-### 6. City of Albuquerque Branded Splash
-**File:** `v2_mockup_6_cabq_branding.png`
-
-NM dawn sky with mass ascension balloons. **"Brought to you by the City of Albuquerque"** in elegant script with city crest/shield. "Balloon Tap 2.0" title below in gold. Play button and audio toggle. Zia-themed balloons visible. Official civic tone with game energy.
 
 ---
 
