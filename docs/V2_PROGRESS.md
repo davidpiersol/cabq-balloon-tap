@@ -7,6 +7,7 @@
 | 3 | `RiveNative.init()` in `main.dart`; CI runs `rive_native:setup` | full `flutter test` |
 | 4 | Immersive `GameShell` (no app bar), About FAB, onboarding | `game_shell_e2e_test.dart`, `onboarding_store_test.dart`, `onboarding_overlay_test.dart` |
 | 5 | Parallax 3-stop sky, glass HUD, balloon burn scale, Rive accent, Lottie new-best, safe-area insets | `widget_test.dart`, existing physics/widget suite |
+| 6 | **2.0.1**: Mass Ascension Dawn PNGs in `assets/concept/`; onboarding + loading backdrop; 5-frame docs + PPT (no civic splash frame) | `concept_assets_test.dart` + full suite |
 
 ## Next (optional)
 

@@ -4,6 +4,13 @@ All notable changes to **Balloon Tap** are listed here.
 
 Rollback tag before this release: **`rollback/pre-hold-parallax-2026-03-27`** (v0.1.0+4 behavior).
 
+## 2.0.1+201 — 2026-03-30
+
+- **Concept art in app**: `assets/concept/` PNGs (frames 1–5); **Mass Ascension Dawn** drives onboarding backdrop and shell loading screen (`ConceptAssets`).
+- **Docs**: `V2_CONCEPT_FRAMES.md` palette + five frames only; removed civic-branded “frame 6” from the concept set; `THIRD_PARTY_ASSETS.md` lists concept PNGs.
+- **PowerPoint**: `tool/generate_pptx.py` regenerated deck without CABQ splash slide.
+- **Tests**: `concept_assets_test.dart` asserts all concept paths load from the bundle.
+
 ## 2.0.0+200 — 2026-03-30 (Balloon Tap 2.0)
 
 - **Immersive shell**: full-screen play; About moved to a top-right FAB-style control; safe-area aware HUD.

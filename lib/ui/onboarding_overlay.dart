@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
 import '../theme/cabq_theme.dart';
+import '../theme/concept_assets.dart';
 
 class OnboardingOverlay extends StatelessWidget {
   const OnboardingOverlay({super.key, required this.onContinue});
@@ -13,60 +14,85 @@ class OnboardingOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Material(
-      color: Colors.black54,
-      child: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Semantics(
-              label: 'Welcome to Balloon Tap. How to play.',
-              child: Card(
-                elevation: 8,
-                clipBehavior: Clip.antiAlias,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SizedBox(
-                          height: 120,
-                          child: Lottie.asset(
-                            lottieAsset,
-                            fit: BoxFit.contain,
-                            repeat: true,
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Positioned.fill(
+          child: Image.asset(
+            ConceptAssets.dawnMassAscension,
+            fit: BoxFit.cover,
+            alignment: Alignment.center,
+            errorBuilder: (_, __, ___) => const ColoredBox(color: Color(0xFF1A1A2E)),
+          ),
+        ),
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withValues(alpha: 0.35),
+                  Colors.black.withValues(alpha: 0.72),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Semantics(
+                label: 'Welcome to Balloon Tap. How to play.',
+                child: Card(
+                  elevation: 8,
+                  clipBehavior: Clip.antiAlias,
+                  color: Colors.white.withValues(alpha: 0.94),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 400),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SizedBox(
+                            height: 120,
+                            child: Lottie.asset(
+                              lottieAsset,
+                              fit: BoxFit.contain,
+                              repeat: true,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Balloon Tap',
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: CabqTheme.primary,
+                          const SizedBox(height: 16),
+                          Text(
+                            'Balloon Tap',
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: CabqTheme.primary,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'New Mexico skies, Balloon Fiesta energy.',
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            color: CabqTheme.accent,
+                          const SizedBox(height: 12),
+                          Text(
+                            'New Mexico skies, Balloon Fiesta energy.',
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              color: CabqTheme.accent,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                        const _Bullet(text: 'Hold anywhere to fire the burner and rise.'),
-                        const _Bullet(text: 'Release to coast briefly, then you descend.'),
-                        const _Bullet(text: 'Collect icons for bonus points — stay aloft!'),
-                        const SizedBox(height: 24),
-                        FilledButton(
-                          onPressed: onContinue,
-                          child: const Text("Let's fly"),
-                        ),
-                      ],
+                          const SizedBox(height: 20),
+                          const _Bullet(text: 'Hold anywhere to fire the burner and rise.'),
+                          const _Bullet(text: 'Release to coast briefly, then you descend.'),
+                          const _Bullet(text: 'Collect icons for bonus points — stay aloft!'),
+                          const SizedBox(height: 24),
+                          FilledButton(
+                            onPressed: onContinue,
+                            child: const Text("Let's fly"),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -74,7 +100,7 @@ class OnboardingOverlay extends StatelessWidget {
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

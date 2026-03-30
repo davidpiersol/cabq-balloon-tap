@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/onboarding_store.dart';
 import '../security/safe_links.dart';
 import '../theme/cabq_theme.dart';
+import '../theme/concept_assets.dart';
 import 'balloon_game.dart';
 import 'onboarding_overlay.dart';
 
@@ -110,11 +111,26 @@ class _GameShellState extends State<GameShell> {
   Widget build(BuildContext context) {
     if (_onboardingDone == null) {
       return Scaffold(
-        body: Center(
-          child: Semantics(
-            label: 'Loading',
-            child: const CircularProgressIndicator(),
-          ),
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fill(
+              child: Image.asset(
+                ConceptAssets.dawnMassAscension,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const ColoredBox(color: Color(0xFF1A1A2E)),
+              ),
+            ),
+            Positioned.fill(
+              child: ColoredBox(color: Colors.black.withValues(alpha: 0.4)),
+            ),
+            Center(
+              child: Semantics(
+                label: 'Loading',
+                child: const CircularProgressIndicator(color: Colors.white),
+              ),
+            ),
+          ],
         ),
       );
     }

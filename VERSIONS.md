@@ -2,6 +2,7 @@
 
 | Version        | Build | Summary |
 | -------------- | ----- | ------- |
+| **2.0.1** | +201 | Bundled Mass Ascension Dawn concept PNGs; onboarding + loading backdrop; docs/PPT reverted to 5-frame set (no civic splash) |
 | **2.0.0** | +200 | v2 visuals: immersive shell, onboarding, Lottie/Rive motion, glass HUD, parallax horizons, ad-slot constants for v3 |
 | **1.1.0-beta.1** | +101 | App Store / TestFlight hardening, privacy manifest, security docs, beta versioning |
 | **0.2.0** | +1    | Hold-burn + coast + parallax mountains; player ground start |
