@@ -12,7 +12,6 @@ import '../game/balloon_physics.dart';
 import '../game/collectibles/collectible_world.dart';
 import '../layout/ad_banner_reserve.dart';
 import '../theme/cabq_theme.dart';
-import 'balloon/balloon_envelope_painter.dart';
 import 'balloon/balloon_layout.dart';
 import 'balloon/customize_sheet.dart';
 import 'balloon/flame_painter.dart';
@@ -20,7 +19,7 @@ import 'collectible_sprite_painter.dart';
 import 'game_over_card.dart';
 import 'motion/rive_hud_accent.dart';
 import 'onboarding_overlay.dart';
-import 'parallax_background_painter.dart';
+import 'parallax_background.dart';
 
 enum BalloonSkin {
   fiesta,
@@ -34,22 +33,8 @@ extension on BalloonSkin {
         BalloonSkin.sandiaSunset => 'Sandia Sunset',
         BalloonSkin.rioDawn => 'Rio Dawn',
       };
-
-  (Color, Color) get skyColors => switch (this) {
-        BalloonSkin.fiesta => (CabqTheme.skyTop, CabqTheme.skyBottom),
-        BalloonSkin.sandiaSunset => (const Color(0xFFFFB347), const Color(0xFF6B2D5C)),
-        BalloonSkin.rioDawn => (const Color(0xFF1E3A5F), const Color(0xFF4A90D9)),
-      };
-
-  Color? get skyHorizon => switch (this) {
-        BalloonSkin.fiesta => const Color(0xFFFFE8CC),
-        BalloonSkin.sandiaSunset => const Color(0xFFFF8FA3),
-        BalloonSkin.rioDawn => const Color(0xFF4A7AB8),
-      };
 }
 
-/// Hold to burn (sustained flame); release → short coast then matched descent (same speed as climb).
-/// Parallax background scrolls left for horizontal illusion.
 class BalloonGame extends StatefulWidget {
   const BalloonGame({super.key});
 
@@ -84,11 +69,11 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
   double _layoutWidth = 400;
   double _layoutHeight = 800;
 
-  /// True when the last finished round beat the best score at round start (Lottie accent).
   bool _newBestOnLastGameOver = false;
-
-  /// Personal best at the moment this round began (survives in-round `_best` updates).
   int _roundStartBest = 0;
+
+  static const _balloonSpriteWidth = 100.0;
+  static const _balloonSpriteHeight = 130.0;
 
   @override
   void initState() {
@@ -278,8 +263,6 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
           balloonCenterYNorm: _yNorm,
           balloonXNorm: _balloonXNorm,
         );
-        final (skyTop, skyBottom) = _skin.skyColors;
-        final skyMid = _skin.skyHorizon;
         final mq = MediaQuery.of(context);
         final bottomInset = math.max(
           16.0,
@@ -289,18 +272,11 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
         return Stack(
           fit: StackFit.expand,
           children: [
+            // Image-based parallax background
             IgnorePointer(
-              child: CustomPaint(
-                painter: ParallaxBackgroundPainter(
-                  skyTop: skyTop,
-                  skyBottom: skyBottom,
-                  skyHorizon: skyMid,
-                  scrollPx: _scrollPx,
-                  timeSec: _elapsedSec,
-                ),
-                size: size,
-              ),
+              child: ParallaxBackground(scrollPx: _scrollPx),
             ),
+            // Collectibles
             IgnorePointer(
               child: CustomPaint(
                 painter: CollectiblesPainter(
@@ -310,6 +286,7 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
                 size: size,
               ),
             ),
+            // Touch layer
             Positioned.fill(
               child: IgnorePointer(
                 ignoring: _gameOver,
@@ -321,20 +298,24 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
                 ),
               ),
             ),
+            // Balloon sprite
             Positioned(
-              left: w * _balloonXNorm - BalloonLayout.positionedHalfWidth,
-              top: balloonY - BalloonLayout.positionedTopOffset,
+              left: w * _balloonXNorm - _balloonSpriteWidth / 2,
+              top: balloonY - _balloonSpriteHeight * 0.65,
               child: IgnorePointer(
                 child: Transform.scale(
-                  scale: 1.0 + 0.028 * _flameStrength,
+                  scale: 1.0 + 0.035 * _flameStrength,
                   alignment: Alignment.bottomCenter,
-                  child: CustomPaint(
-                    size: const Size(BalloonLayout.width, BalloonLayout.height),
-                    painter: BalloonEnvelopePainter(appearance: _appearance),
+                  child: Image.asset(
+                    'assets/images/balloon_sprite.png',
+                    width: _balloonSpriteWidth,
+                    height: _balloonSpriteHeight,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
             ),
+            // Flame
             IgnorePointer(
               child: CustomPaint(
                 painter: FlamePainter(
@@ -346,6 +327,7 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
                 size: size,
               ),
             ),
+            // HUD
             Positioned(
               left: 12,
               right: 12,
@@ -375,6 +357,7 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
                 ],
               ),
             ),
+            // Game over
             if (_gameOver)
               Positioned.fill(
                 child: GameOverCard(
@@ -385,6 +368,7 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
                   lottieAsset: OnboardingOverlay.lottieAsset,
                 ),
               ),
+            // Bottom controls
             Positioned(
               left: 0,
               right: 0,
@@ -394,11 +378,11 @@ class _BalloonGameState extends State<BalloonGame> with SingleTickerProviderStat
                   Semantics(
                     label: _gameOver
                         ? 'Hint: tap to play again'
-                        : 'Hold to burn and rise. Release to coast, then descend at the same speed. Background scrolls for forward motion.',
+                        : 'Hold to burn and rise. Release to coast, then descend.',
                     child: Text(
                       _gameOver
                           ? 'Tap to restart'
-                          : 'Hold to burn · release to coast · sky moves past you',
+                          : 'Hold to burn \u00b7 release to coast',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Colors.white,
@@ -462,9 +446,9 @@ class _HudChip extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.16),
+              color: CabqTheme.glassWhite,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white24),
+              border: Border.all(color: CabqTheme.glassBorder),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -472,8 +456,9 @@ class _HudChip extends StatelessWidget {
                 text,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  shadows: [Shadow(blurRadius: 3, color: Colors.black38)],
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                  shadows: [Shadow(blurRadius: 4, color: Colors.black54)],
                 ),
               ),
             ),

@@ -16,7 +16,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byType(SplashScreen), findsOneWidget);
     expect(find.text('Balloon Tap'), findsOneWidget);
-    expect(find.text('TAP TO PLAY'), findsOneWidget);
+    expect(find.text('PLAY'), findsOneWidget);
   });
 
   testWidgets('tapping play transitions to game', (tester) async {
@@ -27,7 +27,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.text('TAP TO PLAY'));
+    await tester.tap(find.text('PLAY'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.textContaining('Score'), findsOneWidget);

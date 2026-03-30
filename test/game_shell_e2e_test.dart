@@ -16,7 +16,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     // Tap play on splash
-    await tester.tap(find.text('TAP TO PLAY'));
+    await tester.tap(find.text('PLAY'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 

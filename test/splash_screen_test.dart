@@ -16,9 +16,9 @@ void main() {
 
     expect(find.text('Balloon Tap'), findsOneWidget);
     expect(find.text('2.0'), findsOneWidget);
-    expect(find.text('TAP TO PLAY'), findsOneWidget);
+    expect(find.text('PLAY'), findsOneWidget);
 
-    await tester.tap(find.text('TAP TO PLAY'));
+    await tester.tap(find.text('PLAY'));
     expect(played, isTrue);
   });
 }
