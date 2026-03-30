@@ -4,6 +4,10 @@ All notable changes to **Balloon Tap** are listed here.
 
 Rollback tag before this release: **`rollback/pre-hold-parallax-2026-03-27`** (v0.1.0+4 behavior).
 
+## 2.0.2+202 — 2026-03-30
+
+- **Build**: verification gate — no code changes; `flutter test` clean after splash rollout.
+
 ## 2.0.1+201 — 2026-03-30
 
 - **Title screen**: `MassAscensionSplash` with raster from concept frame 1 (`assets/images/splash_mass_ascension.png`), overlay title **Balloon Tap 2.0** / **Mass Ascension Adventure** and **PLAY** (no municipal splash line; About sheet unchanged for `cabq.gov`).
